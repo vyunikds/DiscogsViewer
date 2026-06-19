@@ -22,8 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -123,7 +121,7 @@ fun FavoritesScreen(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally),
 //                    .size(400.dp),
-                painter = androidx.compose.ui.res.painterResource(R.drawable.gigachat_3_landscape),
+                painter = androidx.compose.ui.res.painterResource(R.drawable.fav_landscape),
                 contentDescription = stringResource(R.string.favorites_image_desc),
 //                contentScale = ContentScale.Crop,
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surfaceTint),
