@@ -49,7 +49,6 @@ import com.example.discogsviewer.R
 import com.example.discogsviewer.ScreenRoute
 import com.example.discogsviewer.details.feature.ReleaseDetailsViewModel
 import com.example.discogsviewer.details.feature.ui.ReleaseDetailsScreen
-import com.example.discogsviewer.favorites.domain.FavoriteSortMode
 import com.example.discogsviewer.favorites.feature.FavoritesViewModel
 import com.example.discogsviewer.favorites.feature.ui.FavoriteSortBottomSheet
 import com.example.discogsviewer.favorites.feature.ui.FavoritesScreen
@@ -149,7 +148,11 @@ fun MainNavigation() {
             composable(
                 route = ScreenRoute.Details.route,
                 enterTransition = {
-                    slideInHorizontally(animationSpec = tween(300)) { it } + fadeIn(animationSpec = tween(300))
+                    slideInHorizontally(animationSpec = tween(300)) { it } + fadeIn(
+                        animationSpec = tween(
+                            300
+                        )
+                    )
                 },
                 exitTransition = {
                     slideOutHorizontally(animationSpec = tween(300)) { -it }
@@ -158,7 +161,11 @@ fun MainNavigation() {
                     slideInHorizontally(animationSpec = tween(300)) { -it }
                 },
                 popExitTransition = {
-                    slideOutHorizontally(animationSpec = tween(300)) { it } + fadeOut(animationSpec = tween(300))
+                    slideOutHorizontally(animationSpec = tween(300)) { it } + fadeOut(
+                        animationSpec = tween(
+                            300
+                        )
+                    )
                 },
             ) {
                 DetailsScreenContent(
@@ -208,7 +215,11 @@ fun MainNavigation() {
             composable(
                 route = ScreenRoute.Settings.route,
                 enterTransition = {
-                    slideInHorizontally(animationSpec = tween(300)) { it } + fadeIn(animationSpec = tween(300))
+                    slideInHorizontally(animationSpec = tween(300)) { it } + fadeIn(
+                        animationSpec = tween(
+                            300
+                        )
+                    )
                 },
                 exitTransition = {
                     slideOutHorizontally(animationSpec = tween(300)) { -it }
@@ -217,7 +228,11 @@ fun MainNavigation() {
                     slideInHorizontally(animationSpec = tween(300)) { -it }
                 },
                 popExitTransition = {
-                    slideOutHorizontally(animationSpec = tween(300)) { it } + fadeOut(animationSpec = tween(300))
+                    slideOutHorizontally(animationSpec = tween(300)) { it } + fadeOut(
+                        animationSpec = tween(
+                            300
+                        )
+                    )
                 },
             ) {
                 SettingsScreenContent(
@@ -277,7 +292,6 @@ fun SearchScreenContent(
         modifier = modifier,
         state = state,
         listState = listState,
-        onRefresh = viewModel::refresh,
         onSearchQueryChanged = viewModel::onSearchQueryChanged,
         onSearchConfirmed = viewModel::confirmQuery,
         onHistoryItemClicked = { query ->
@@ -294,6 +308,7 @@ fun SearchScreenContent(
         onErrorShown = viewModel::errorHasShown,
         onToggleFavorite = viewModel::onToggleFavorite,
         onClearHistory = viewModel::clearHistory,
+        onLoadMore = viewModel::loadMore,
     )
 }
 
@@ -316,6 +331,7 @@ fun FavoritesScreenContent(
 
     if (showSettings) {
         FavoriteSortBottomSheet(
+            currentMode = state.currentSortMode,
             onDismiss = { showSettings = false },
             onSelect = { mode ->
                 showSettings = false

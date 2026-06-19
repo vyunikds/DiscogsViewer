@@ -30,15 +30,13 @@ class ReleasesApiServiceImpl(private val client: HttpClient) : ReleasesApiServic
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @OptIn(InternalSerializationApi::class)
-    override suspend fun searchReleases(title: String): List<ReleaseResultDto> {
+    override suspend fun searchReleases(title: String, page: Int): SearchResponse {
         return try {
             val encodedTitle = java.net.URLEncoder.encode(title, Charsets.UTF_8)
             val url =
-                "$BASE_URL/database/search?q=$encodedTitle&type=release&token=$AUTH_TOKEN&page=1&per_page=10"
-//                "$BASE_URL/database/search?q=$encodedTitle&type=release&page=1&per_page=10"
+                "$BASE_URL/database/search?q=$encodedTitle&type=release&token=$AUTH_TOKEN&page=$page&per_page=20"
             val response = client.get(url)
-            val body: SearchResponse = response.body()
-            body.results
+            response.body()
         } catch (e: Exception) {
             Log.e("UserApiService", "Error searching releases: ${e.message}", e)
             throw ReleasesApiFetchException(e)
