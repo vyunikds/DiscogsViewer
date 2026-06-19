@@ -2,6 +2,7 @@ package com.example.discogsviewer.favorites.feature
 
 import android.content.Context
 import androidx.compose.runtime.Immutable
+import com.example.discogsviewer.favorites.domain.FavoriteSortMode
 import com.example.discogsviewer.ui.common.ReleaseCardState
 
 typealias ErrorProvider = (Context) -> String
@@ -15,6 +16,7 @@ data class FavoritesScreenState(
     val hasNextPage: Boolean = true,
     val hasError: Boolean = false,
     val errorProvider: ErrorProvider = { "" },
+    val currentSortMode: FavoriteSortMode = FavoriteSortMode.BY_DATE,
 )
 
 data class FavoriteReleasesState(

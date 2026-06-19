@@ -1,6 +1,6 @@
 package com.example.search
 
-import com.example.network.dto.ReleaseResultDto
+import com.example.network.dto.SearchResponse
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -16,8 +16,8 @@ class ReleaseSearchRepository @Inject constructor(
     @Named("ioDispatcher") private val dispatcher: CoroutineDispatcher,
 ) {
     @OptIn(InternalSerializationApi::class)
-    fun consumeReleaseSearch(title: String): Flow<List<ReleaseResultDto>> = flow {
-        val releases = releaseSearchRemoteDataSource.searchRelease(title)
-        emit(releases)
+    fun consumeReleaseSearch(title: String, page: Int): Flow<SearchResponse> = flow {
+        val response = releaseSearchRemoteDataSource.searchRelease(title, page)
+        emit(response)
     }.flowOn(dispatcher)
 }

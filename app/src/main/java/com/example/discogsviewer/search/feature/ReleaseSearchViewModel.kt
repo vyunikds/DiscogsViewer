@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.discogsviewer.R
 import com.example.discogsviewer.search.domain.ConsumeReleasesSearchUseCase
+import com.example.discogsviewer.search.domain.SearchResultPage
 import com.example.favorite.FavoriteItem
 import com.example.favorite.ToggleFavoriteUseCase
 import com.example.settings.SearchHistoryRepository
@@ -15,7 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
@@ -85,21 +85,28 @@ class ReleaseSearchViewModel @Inject constructor(
         }
     }
 
+    private var currentPage = 1
+
     @OptIn(InternalSerializationApi::class)
     private fun requestReleases(searchQuery: String) {
         requestJob?.cancel()
+        currentPage = 1
 
-        requestJob = consumeReleasesSearchUseCase(searchQuery).map { releases ->
-            releases.map { release -> releasesSearchStateFactory.create(release) }
-        }
-            .onStart {
-                _state.update { screenState -> screenState.copy(isLoading = true) }
+        requestJob = consumeReleasesSearchUseCase(searchQuery, 1).onStart {
+            _state.update { screenState ->
+                screenState.copy(
+                    isLoading = true,
+                    isLoadingMore = false,
+                    hasNextPage = true,
+                )
             }
-            .onEach { releaseListState ->
+        }
+            .onEach { page ->
                 _state.update { screenState ->
                     screenState.copy(
                         isLoading = false,
-                        releasesSearchListState = releaseListState,
+                        releasesSearchListState = mapSearchResultPage(page),
+                        hasNextPage = page.hasNextPage,
                     )
                 }
             }
@@ -112,6 +119,44 @@ class ReleaseSearchViewModel @Inject constructor(
                 }
             }
             .launchIn(viewModelScope)
+    }
+
+    fun loadMore() {
+        val curr = _state.value
+        if (curr.isLoadingMore || !curr.hasNextPage) return
+
+        _state.update { it.copy(isLoadingMore = true) }
+        currentPage++
+
+        viewModelScope.launch {
+            try {
+                consumeReleasesSearchUseCase(_state.value.searchQuery, currentPage)
+                    .collect { page ->
+                        val newItems = mapSearchResultPage(page)
+                        _state.update { screenState ->
+                            val existingIds = screenState.releasesSearchListState.mapTo(mutableSetOf()) { it.id }
+                            val uniqueNew = newItems.filter { it.id !in existingIds }
+                            screenState.copy(
+                                isLoadingMore = false,
+                                releasesSearchListState = screenState.releasesSearchListState + uniqueNew,
+                                hasNextPage = page.hasNextPage,
+                            )
+                        }
+                    }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isLoadingMore = false,
+                        hasError = true,
+                        errorProvider = { it.getString(R.string.error_while_loading_data) }
+                    )
+                }
+            }
+        }
+    }
+
+    private fun mapSearchResultPage(page: SearchResultPage): List<ReleaseSearchState> {
+        return page.releases.map { releasesSearchStateFactory.create(it) }
     }
 
 

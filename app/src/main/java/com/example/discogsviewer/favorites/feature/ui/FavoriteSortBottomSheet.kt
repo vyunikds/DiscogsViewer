@@ -12,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -23,6 +22,7 @@ import com.example.discogsviewer.favorites.domain.FavoriteSortMode
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoriteSortBottomSheet(
+    currentMode: FavoriteSortMode,
     onDismiss: () -> Unit,
     onSelect: (FavoriteSortMode) -> Unit,
 ) {
@@ -54,7 +54,7 @@ fun FavoriteSortBottomSheet(
                 ) {
                     Text(
                         text = stringResource(mode.labelRes),
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = if (mode == currentMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                     )
                 }
             }

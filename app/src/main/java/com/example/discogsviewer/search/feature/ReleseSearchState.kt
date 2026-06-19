@@ -14,6 +14,8 @@ data class ReleasesSearchScreenState(
     val searchHistory: List<String> = emptyList(),
     val hasError: Boolean = false,
     val errorProvider: ErrorProvider = { "" },
+    val isLoadingMore: Boolean = false,
+    val hasNextPage: Boolean = true,
 )
 
 data class ReleaseSearchState(
