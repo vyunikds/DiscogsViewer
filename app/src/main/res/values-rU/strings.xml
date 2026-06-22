@@ -1,0 +1,65 @@
+<resources>
+    <string name="app_name">DiscogsViewer</string>
+    <string name="title_products">Продукты</string>
+    <string name="title_main">Главная</string>
+    <string name="price_with_arg">%1$s руб</string>
+    <string name="error_while_loading_data">Ошибка загрузки данных</string>
+    <string name="title_promo">Промо</string>
+    <string name="title_details">Детали</string>
+    <string name="empty_favorites">Избранное пусто</string>
+    <string name="add_favorite_desc">Добавить в избранное</string>
+    <string name="remove_favorite_desc">Удалить из избранного</string>
+
+    <!-- Navigation -->
+    <string name="nav_top_releases">Топ релизов</string>
+    <string name="nav_details">Детали</string>
+    <string name="nav_favorites">Избранное</string>
+    <string name="nav_settings">Настройки</string>
+    <string name="nav_search">Поиск</string>
+
+    <!-- Common -->
+    <string name="back">Назад</string>
+    <string name="clear">Очистить</string>
+    <string name="delete">Удалить</string>
+    <string name="apply">Применить</string>
+    <string name="cancel">Отмена</string>
+    <string name="share_via">Поделиться через</string>
+
+    <!-- Search -->
+    <string name="search_placeholder">Поиск релизов…</string>
+    <string name="clear_all_history">Очистить историю</string>
+
+    <!-- Favorites -->
+    <string name="favorites_image_desc">Избранное</string>
+    <plurals name="favorites_count">
+        <item quantity="one">%d релиз</item>
+        <item quantity="few">%d релиза</item>
+        <item quantity="many">%d релизов</item>
+        <item quantity="other">%d релизов</item>
+    </plurals>
+
+    <!-- Sort -->
+    <string name="sort_title">Сортировка</string>
+    <string name="sort_by_date">По дате добавления</string>
+    <string name="sort_by_release_title">По названию релиза</string>
+    <string name="sort_by_artist_title">По названию артиста</string>
+
+    <!-- Details -->
+    <string name="try_again">Попробовать снова</string>
+    <string name="image_not_available">Изображение недоступно</string>
+    <string name="already_have">У %1$s уже есть</string>
+    <string name="label_artist_name">Имя артиста:</string>
+    <string name="label_genres">Жанры:</string>
+    <string name="label_country">Страна:</string>
+    <string name="label_release_id">ID релиза:</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Настройки</string>
+    <string name="theme_title">Тема</string>
+    <string name="theme_system">Как в системе</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+
+    <!-- Errors -->
+    <string name="error_unknown">Неизвестная ошибка</string>
+</resources>
