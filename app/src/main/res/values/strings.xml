@@ -26,13 +26,16 @@
     <string name="share_via">Share via</string>
 
     <!-- Search -->
-    <string name="search_placeholder">Search releases...</string>
+    <string name="search_placeholder">Search releases…</string>
     <string name="clear_all_history">Clear all history</string>
 
     <!-- Favorites -->
     <string name="favorites_image_desc">Favorites</string>
     <plurals name="favorites_count">
         <item quantity="one">%d release</item>
+        <item quantity="two">%d releases</item>
+        <item quantity="few">%d releases</item>
+        <item quantity="many">%d releases</item>
         <item quantity="other">%d releases</item>
     </plurals>
 
