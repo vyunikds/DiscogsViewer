@@ -18,8 +18,19 @@ class FavoritesRepositoryImpl @Inject constructor(
     override fun consumeCount(): Flow<Int> =
         localDataSource.consumeCount()
 
-    override suspend fun consumePaginated(sortMode: DataSourceSortMode, limit: Int, offset: Int): List<FavoriteItem> {
-        val dbos = localDataSource.consumePaginated(sortMode, limit, offset)
+    override fun consumeFavoriteGenres(): Flow<List<String>> =
+        localDataSource.consumeFavoriteGenres()
+
+    override suspend fun getFilteredGenreCount(genre: String): Int =
+        localDataSource.getFilteredGenreCount(genre)
+
+    override suspend fun consumePaginated(
+        sortMode: DataSourceSortMode,
+        limit: Int,
+        offset: Int,
+        genre: String?,
+    ): List<FavoriteItem> {
+        val dbos = localDataSource.consumePaginated(sortMode, limit, offset, genre)
         return dbos.map(mapper::toDomain)
     }
 

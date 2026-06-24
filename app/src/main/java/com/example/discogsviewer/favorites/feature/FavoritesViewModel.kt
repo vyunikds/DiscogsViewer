@@ -30,6 +30,7 @@ class FavoritesViewModel @Inject constructor(
     val state: StateFlow<FavoritesScreenState> = _state.asStateFlow()
 
     private var currentSortMode = FavoriteSortMode.BY_DATE
+    private var selectedGenre: String? = null
     private val pageSize = 20
 
     fun setSortMode(mode: FavoriteSortMode) {
@@ -38,10 +39,23 @@ class FavoritesViewModel @Inject constructor(
         resetAndReload()
     }
 
+    fun setGenreFilter(genre: String?) {
+        selectedGenre = genre
+        _state.update { it.copy(selectedGenre = genre) }
+        resetAndReload()
+    }
+
     init {
         favoritesRepository.consumeCount()
             .onEach { count ->
-                _state.update { it.copy(totalCount = count) }
+                if (selectedGenre == null) {
+                    _state.update { it.copy(totalCount = count) }
+                }
+            }
+            .launchIn(viewModelScope)
+        favoritesRepository.consumeFavoriteGenres()
+            .onEach { genres ->
+                _state.update { it.copy(availableGenres = genres) }
             }
             .launchIn(viewModelScope)
         loadPage(0)
@@ -96,12 +110,23 @@ class FavoritesViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val releasesWithFavorite = loadFavoritesPageUseCase(currentSortMode, pageSize, offset)
+                val releasesWithFavorite = loadFavoritesPageUseCase(
+                    currentSortMode,
+                    pageSize,
+                    offset,
+                    selectedGenre,
+                )
                 val states = favoritesStateFactory.create(releasesWithFavorite)
                 val hasNext = releasesWithFavorite.size == pageSize
+                val count = if (selectedGenre != null) {
+                    favoritesRepository.getFilteredGenreCount(selectedGenre!!)
+                } else {
+                    0
+                }
                 _state.update {
                     it.copy(
                         favorites = if (requestedPage == 0) states else it.favorites + states,
+                        totalCount = if (count > 0) count else it.totalCount,
                         isLoading = false,
                         isLoadingMore = false,
                         hasNextPage = hasNext,

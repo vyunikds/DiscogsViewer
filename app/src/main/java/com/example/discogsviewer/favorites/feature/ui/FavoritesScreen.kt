@@ -1,6 +1,9 @@
 package com.example.discogsviewer.favorites.feature.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +15,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
@@ -48,6 +53,7 @@ fun FavoritesScreen(
     onSettingsClicked: () -> Unit,
     onSortClicked: () -> Unit,
     onLoadMore: () -> Unit = {},
+    onGenreClicked: (String?) -> Unit = {},
 ) {
     val context = LocalContext.current
     val count = state.totalCount
@@ -134,6 +140,56 @@ fun FavoritesScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            if (state.availableGenres.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = stringResource(R.string.genre_all),
+                        modifier = Modifier
+                            .background(
+                                color = if (state.selectedGenre == null)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.secondary,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .clickable { onGenreClicked(null) }
+                            .padding(horizontal = 6.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (state.selectedGenre == null)
+                            MaterialTheme.colorScheme.onPrimary
+                        else
+                            MaterialTheme.colorScheme.onSecondary
+                    )
+                    state.availableGenres.forEach { genre ->
+                        val isSelected = genre == state.selectedGenre
+                        Text(
+                            text = genre,
+                            modifier = Modifier
+                                .background(
+                                    color = if (isSelected)
+                                        MaterialTheme.colorScheme.primary
+                                    else
+                                        MaterialTheme.colorScheme.secondary,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .clickable { onGenreClicked(genre) }
+                                .padding(horizontal = 6.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (isSelected)
+                                MaterialTheme.colorScheme.onPrimary
+                            else
+                                MaterialTheme.colorScheme.onSecondary
+                        )
+                    }
+                }
+            }
         }
 
         Box(
@@ -204,19 +260,22 @@ fun FavoritesScreen(
 @Composable
 fun FavoritesScreenPreview() {
     MaterialTheme {
-        FavoritesScreen(
-            state = FavoritesScreenState(
-                isLoading = false,
-                isLoadingMore = false,
-                hasNextPage = true,
-                hasError = false,
-                errorProvider = { "" },
-                favorites = listOf()
-            ),
-            onRemoveFavorite = {},
-            onItemClicked = { },
-            onSortClicked = { },
-            onSettingsClicked = { },
-        )
+    FavoritesScreen(
+        state = FavoritesScreenState(
+            isLoading = false,
+            isLoadingMore = false,
+            hasNextPage = true,
+            hasError = false,
+            errorProvider = { "" },
+            favorites = listOf(),
+            availableGenres = listOf("Rock", "Jazz", "Electronic", "Hip-Hop"),
+            selectedGenre = null,
+        ),
+        onRemoveFavorite = {},
+        onItemClicked = { },
+        onSortClicked = { },
+        onSettingsClicked = { },
+        onGenreClicked = { },
+    )
     }
 }

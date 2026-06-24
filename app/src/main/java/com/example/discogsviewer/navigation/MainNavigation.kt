@@ -352,6 +352,10 @@ fun FavoritesScreenContent(
         onSettingsClicked = { navController.navigate(ScreenRoute.Settings.route) },
         onSortClicked = { showSettings = true },
         onLoadMore = viewModel::loadMore,
+        onGenreClicked = { genre ->
+            viewModel.setGenreFilter(genre)
+            scrollToTop()
+        },
     )
 }
 

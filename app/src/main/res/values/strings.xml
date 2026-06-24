@@ -45,6 +45,9 @@
     <string name="sort_by_release_title">By Release Title</string>
     <string name="sort_by_artist_title">By Artist Title</string>
 
+    <!-- Genre Filter -->
+    <string name="genre_all">All</string>
+
     <!-- Details -->
     <string name="try_again">Try again</string>
     <string name="image_not_available">Image not available</string>
