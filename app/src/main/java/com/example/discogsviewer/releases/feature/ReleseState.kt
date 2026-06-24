@@ -12,6 +12,7 @@ data class ReleasesScreenState(
     val releasesListState: List<ReleaseState> = emptyList(),
     val hasError: Boolean = false,
     val errorProvider: ErrorProvider = { "" },
+    val isInitialized: Boolean = false,
 )
 
 data class ReleaseState(

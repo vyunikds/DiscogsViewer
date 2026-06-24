@@ -103,25 +103,27 @@ fun ReleaseSmallCard(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                Row(
-                    modifier = Modifier
-                        .horizontalScroll(rememberScrollState())
-                        .height(IntrinsicSize.Min),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    release.genre.forEach { genre ->
-                        Text(
-                            text = genre,
-                            modifier = Modifier
-                                .background(
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                                .padding(horizontal = 6.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSecondary
-                        )
+                if (mode != ReleaseSmallCardMode.FAVORITES) {
+                    Row(
+                        modifier = Modifier
+                            .horizontalScroll(rememberScrollState())
+                            .height(IntrinsicSize.Min),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        release.genre.forEach { genre ->
+                            Text(
+                                text = genre,
+                                modifier = Modifier
+                                    .background(
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(horizontal = 6.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSecondary
+                            )
+                        }
                     }
                 }
             }

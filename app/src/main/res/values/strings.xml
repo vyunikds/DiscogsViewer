@@ -48,6 +48,9 @@
     <!-- Genre Filter -->
     <string name="genre_all">All</string>
 
+    <!-- Search -->
+    <string name="empty_search_history">Search history is empty. Start searching…</string>
+
     <!-- Details -->
     <string name="try_again">Try again</string>
     <string name="image_not_available">Image not available</string>
@@ -66,4 +69,5 @@
 
     <!-- Errors -->
     <string name="error_unknown">Unknown error</string>
+    <string name="releases_empty_error">Something went wrong. Try again later</string>
 </resources>

@@ -18,23 +18,6 @@ class ReleaseDataMapper @Inject constructor() {
             genres = releaseDto.genre,
             communityHave = releaseDto.community.have,
             communityWant = releaseDto.community.want,
-//            genre = TODO(),
-//            format = TODO(),
-//            style = TODO(),
-//            label = TODO(),
-//            type = TODO(),
-//            barcode = TODO(),
-//            masterId = TODO(),
-//            masterUrl = TODO(),
-//            uri = TODO(),
-//            catno = TODO(),
-//            coverImage = TODO(),
-//            resourceUrl = TODO(),
-//            formatQuantity = TODO(),
-//            inCollection = TODO(),
-//            inWantlist = TODO(),
-//            communityHave = TODO(),
-//            communityWant = TODO()
         )
     }
 }

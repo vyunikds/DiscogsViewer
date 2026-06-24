@@ -73,184 +73,179 @@ fun FavoritesScreen(
         }
     }
 
-    Column {
-        Row(
-            modifier = Modifier
-                .align(Alignment.End),
-//                .padding(vertical = 12.dp),
-        ) {
-            IconButton(
+    Box(modifier = modifier.fillMaxSize()) {
+        Column {
+            Row(
                 modifier = Modifier
-                    .padding(6.dp)
-                    .background(
-                        color = Color.White.copy(alpha = 0.5f),
-                        shape = androidx.compose.foundation.shape.CircleShape
-                    ),
-                onClick = onSettingsClicked,
+                    .align(Alignment.End),
             ) {
-                Icon(
+                IconButton(
                     modifier = Modifier
-                        .size(48.dp)
-                        .padding(6.dp),
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+                        .padding(6.dp)
+                        .background(
+                            color = Color.White.copy(alpha = 0.5f),
+                            shape = androidx.compose.foundation.shape.CircleShape
+                        ),
+                    onClick = onSettingsClicked,
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .padding(6.dp),
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
 
-            IconButton(
-                modifier = Modifier
-                    .padding(6.dp)
-                    .background(
-                        color = Color.White.copy(alpha = 0.5f),
-                        shape = androidx.compose.foundation.shape.CircleShape
-                    ),
-                onClick = onSortClicked,
-            ) {
-                Icon(
+                IconButton(
                     modifier = Modifier
-                        .size(48.dp)
-                        .padding(6.dp),
-                    imageVector = Icons.Default.List,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                        .padding(6.dp)
+                        .background(
+                            color = Color.White.copy(alpha = 0.5f),
+                            shape = androidx.compose.foundation.shape.CircleShape
+                        ),
+                    onClick = onSortClicked,
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .padding(6.dp),
+                        imageVector = Icons.Default.List,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
-        }
-        Column(
-            modifier = modifier
-                .align(Alignment.Start)
-                .padding(horizontal = 12.dp)
-                .fillMaxWidth(),
-        ) {
-            androidx.compose.foundation.Image(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally),
-//                    .size(400.dp),
-                painter = androidx.compose.ui.res.painterResource(R.drawable.fav_landscape),
-                contentDescription = stringResource(R.string.favorites_image_desc),
-//                contentScale = ContentScale.Crop,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surfaceTint),
-            )
-            Text(
+            Column(
                 modifier = Modifier
                     .align(Alignment.Start)
-                    .padding(bottom = 6.dp),
-                text = pluralStringResource(R.plurals.favorites_count, count, count),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            if (state.availableGenres.isNotEmpty()) {
-                Row(
+                    .padding(horizontal = 12.dp)
+                    .fillMaxWidth(),
+            ) {
+                androidx.compose.foundation.Image(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .padding(bottom = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+                        .align(Alignment.CenterHorizontally),
+                    painter = androidx.compose.ui.res.painterResource(R.drawable.fav_landscape),
+                    contentDescription = stringResource(R.string.favorites_image_desc),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surfaceTint),
+                )
+                if (count > 0) {
                     Text(
-                        text = stringResource(R.string.genre_all),
                         modifier = Modifier
-                            .background(
-                                color = if (state.selectedGenre == null)
-                                    MaterialTheme.colorScheme.primary
-                                else
-                                    MaterialTheme.colorScheme.secondary,
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                            .clickable { onGenreClicked(null) }
-                            .padding(horizontal = 6.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (state.selectedGenre == null)
-                            MaterialTheme.colorScheme.onPrimary
-                        else
-                            MaterialTheme.colorScheme.onSecondary
+                            .align(Alignment.Start)
+                            .padding(bottom = 6.dp),
+                        text = pluralStringResource(R.plurals.favorites_count, count, count),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    state.availableGenres.forEach { genre ->
-                        val isSelected = genre == state.selectedGenre
+                }
+                if (state.availableGenres.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(bottom = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Text(
-                            text = genre,
+                            text = stringResource(R.string.genre_all),
                             modifier = Modifier
                                 .background(
-                                    color = if (isSelected)
+                                    color = if (state.selectedGenre == null)
                                         MaterialTheme.colorScheme.primary
                                     else
                                         MaterialTheme.colorScheme.secondary,
                                     shape = RoundedCornerShape(8.dp)
                                 )
-                                .clickable { onGenreClicked(genre) }
+                                .clickable { onGenreClicked(null) }
                                 .padding(horizontal = 6.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelSmall,
-                            color = if (isSelected)
+                            color = if (state.selectedGenre == null)
                                 MaterialTheme.colorScheme.onPrimary
                             else
                                 MaterialTheme.colorScheme.onSecondary
                         )
+                        state.availableGenres.forEach { genre ->
+                            val isSelected = genre == state.selectedGenre
+                            Text(
+                                text = genre,
+                                modifier = Modifier
+                                    .background(
+                                        color = if (isSelected)
+                                            MaterialTheme.colorScheme.primary
+                                        else
+                                            MaterialTheme.colorScheme.secondary,
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .clickable { onGenreClicked(genre) }
+                                    .padding(horizontal = 6.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (isSelected)
+                                    MaterialTheme.colorScheme.onPrimary
+                                else
+                                    MaterialTheme.colorScheme.onSecondary
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (state.favorites.isNotEmpty()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    state = listState,
+                ) {
+                    items(
+                        items = state.favorites,
+                        key = { it.id }
+                    ) { favorite ->
+                        ReleaseSmallCard(
+                            release = favorite.toReleaseCardState(),
+                            mode = ReleaseSmallCardMode.FAVORITES,
+                            onRemoveFavorite = onRemoveFavorite,
+                            onItemClicked = onItemClicked,
+                        )
+                    }
+                    if (state.isLoadingMore) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
                     }
                 }
             }
         }
 
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-        ) {
-            when {
-                state.isLoading && state.favorites.isEmpty() -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+        when {
+            state.isLoading && state.favorites.isEmpty() -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
 
-                state.hasError -> {
-                    Text(
-                        text = state.errorProvider(context),
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+            state.hasError -> {
+                Text(
+                    text = state.errorProvider(context),
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
 
-                state.favorites.isEmpty() -> {
-                    Text(
-                        text = stringResource(R.string.empty_favorites),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        state = listState,
-//                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(
-                            items = state.favorites,
-                            key = { it.id }
-                        ) { favorite ->
-                            ReleaseSmallCard(
-                                release = favorite.toReleaseCardState(),
-                                mode = ReleaseSmallCardMode.FAVORITES,
-                                onRemoveFavorite = onRemoveFavorite,
-                                onItemClicked = onItemClicked,
-                            )
-                        }
-                        if (state.isLoadingMore) {
-                            item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    CircularProgressIndicator()
-                                }
-                            }
-                        }
-                    }
-                }
+            state.favorites.isEmpty() -> {
+                Text(
+                    text = stringResource(R.string.empty_favorites),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
         }
     }

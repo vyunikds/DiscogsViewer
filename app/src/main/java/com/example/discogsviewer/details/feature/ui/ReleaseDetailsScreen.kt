@@ -140,7 +140,6 @@ fun ReleaseDetailsScreen(
                             .background(
                                 Brush.verticalGradient(
                                     0f to Color.Transparent,
-//                                    0.7f to MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
                                     0.90f to MaterialTheme.colorScheme.background.copy(alpha = 0.99f),
                                     0.95f to MaterialTheme.colorScheme.background,
                                 )
@@ -171,11 +170,9 @@ fun ReleaseDetailsScreen(
                         )
                         Row(
                             modifier = Modifier
-//                                .align(Alignment.Start)
                                 .padding(vertical = 12.dp),
                         ) {
                             Icon(
-//                                modifier = Modifier.padding( 6.dp),
                                 imageVector = Icons.Default.Person,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurface,
@@ -229,7 +226,6 @@ fun ReleaseDetailsScreen(
                                 )
                             },
                             modifier = Modifier
-//                                .align(Alignment.BottomEnd)
                                 .padding(6.dp)
                                 .background(
                                     color = Color.White.copy(alpha = 0.5f),
@@ -397,34 +393,6 @@ fun ReleaseDetailsScreen(
                         }
                     }
                 }
-
-//                Column(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(16.dp),
-//                    horizontalAlignment = Alignment.End
-//                ) {
-//                    Text(
-//                        text = details.title,
-//                        fontSize = 24.sp,
-//                        fontWeight = FontWeight.Medium,
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .align(Alignment.Start),
-//                        style = MaterialTheme.typography.titleMedium,
-//                        color = MaterialTheme.colorScheme.secondary
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(8.dp))
-//
-//                    Text(
-//                        text = details.country,
-//                        fontSize = 18.sp,
-//                        modifier = Modifier.padding(vertical = 14.dp),
-//                        style = MaterialTheme.typography.titleSmall,
-//                        color = MaterialTheme.colorScheme.primary
-//                    )
-//                }
             }
         }
     }

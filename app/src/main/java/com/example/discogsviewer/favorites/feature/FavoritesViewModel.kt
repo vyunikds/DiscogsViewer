@@ -12,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -121,12 +122,12 @@ class FavoritesViewModel @Inject constructor(
                 val count = if (selectedGenre != null) {
                     favoritesRepository.getFilteredGenreCount(selectedGenre!!)
                 } else {
-                    0
+                    favoritesRepository.consumeCount().first()
                 }
                 _state.update {
                     it.copy(
                         favorites = if (requestedPage == 0) states else it.favorites + states,
-                        totalCount = if (count > 0) count else it.totalCount,
+                        totalCount = count,
                         isLoading = false,
                         isLoadingMore = false,
                         hasNextPage = hasNext,
