@@ -22,9 +22,10 @@ class FavoritesRepositoryImpl @Inject constructor(
     override suspend fun consumePaginated(
         sortMode: DataSourceSortMode,
         limit: Int,
-        offset: Int
+        offset: Int,
+        genre: String?,
     ): List<FavoriteReleaseItem> {
-        val fullReleases = localDataSource.consumePaginated(sortMode, limit, offset)
+        val fullReleases = localDataSource.consumePaginated(sortMode, limit, offset, genre)
         return fullReleases.map { fullRelease ->
             FavoriteReleaseItem(
                 releaseId = fullRelease.release.id,
@@ -45,17 +46,4 @@ class FavoritesRepositoryImpl @Inject constructor(
     override suspend fun removeFromFavorites(releaseId: String) {
         localDataSource.remove(releaseId)
     }
-
-    private fun toDbo(item: FavoriteItem): FavoriteDbo = FavoriteDbo(
-        releaseId = item.releaseId,
-        artistTitle = item.artistTitle,
-        releaseTitle = item.releaseTitle,
-        country = item.country,
-        genres = item.genres,
-        thumb = item.thumb,
-        coverImage = item.coverImage,
-        communityHave = item.communityHave,
-        communityWant = item.communityWant,
-        addedAt = item.addedAt,
-    )
 }

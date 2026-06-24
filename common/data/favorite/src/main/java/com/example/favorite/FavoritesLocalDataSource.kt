@@ -24,8 +24,8 @@ class FavoritesLocalDataSource @Inject constructor(
     fun consumeCount(): Flow<Int> = favoritesDao.getCount()
 
     fun consumeFavoriteGenres(): Flow<List<String>> =
-        favoritesDao.getAll().map { all: List<FavoriteDbo> ->
-            all.flatMap { item -> item.genres }
+        favoritesDao.getAllFull().map { all: List<FullReleaseDbo> ->
+            all.flatMap { it.genresList.map { g -> g.genre } }
                 .groupingBy { it }
                 .eachCount()
                 .toList()
@@ -34,8 +34,8 @@ class FavoritesLocalDataSource @Inject constructor(
         }
 
     suspend fun getFilteredGenreCount(genre: String): Int {
-        val all = favoritesDao.getAll().first()
-        return all.count { item -> genre in item.genres }
+        val all = favoritesDao.getAllFull().first()
+        return all.count { it.genresList.any { g -> g.genre == genre } }
     }
 
     suspend fun consumePaginated(
@@ -45,30 +45,31 @@ class FavoritesLocalDataSource @Inject constructor(
         genre: String? = null,
     ): List<FullReleaseDbo> {
         if (genre != null) {
-            val filtered = favoritesDao.getAll()
+            val filtered: List<FullReleaseDbo> = favoritesDao.getAllFull()
                 .first()
-                .filter { item -> genre in item.genres }
+                .filter { it.genresList.any { g -> g.genre == genre } }
 
-            val sorted: List<FavoriteDbo> = when (sortMode) {
+            val sorted: List<FullReleaseDbo> = when (sortMode) {
                 DataSourceSortMode.BY_DATE -> {
-                    filtered.sortedByDescending { item: FavoriteDbo -> item.addedAt }
+                    val favAddedAt = favoritesDao.getAll().first().associate { it.releaseId to it.addedAt }
+                    filtered.sortedByDescending { favAddedAt[it.release.id] ?: 0L }
                 }
                 DataSourceSortMode.BY_ARTIST_TITLE -> {
-                    val allArtists = filtered.map { item: FavoriteDbo -> item.artistTitle.lowercase() }.distinct().sorted()
-                    val allTitles = filtered.map { item: FavoriteDbo -> item.releaseTitle.lowercase() }.distinct().sorted()
-                    filtered.sortedWith(Comparator<FavoriteDbo> { a, b ->
-                        val artistCmp = allArtists.indexOf(a.artistTitle.lowercase()).compareTo(allArtists.indexOf(b.artistTitle.lowercase()))
-                        if (artistCmp != 0) artistCmp
-                        else allTitles.indexOf(a.releaseTitle.lowercase()).compareTo(allTitles.indexOf(b.releaseTitle.lowercase()))
+                    val allArtists = filtered.map { it.release.artistTitle.lowercase() }.distinct().sorted()
+                    val allTitles = filtered.map { it.release.releaseTitle.lowercase() }.distinct().sorted()
+                    filtered.sortedWith(compareBy<FullReleaseDbo> {
+                        allArtists.indexOf(it.release.artistTitle.lowercase())
+                    }.thenBy {
+                        allTitles.indexOf(it.release.releaseTitle.lowercase())
                     })
                 }
                 DataSourceSortMode.BY_RELEASE_TITLE -> {
-                    val allTitles = filtered.map { item: FavoriteDbo -> item.releaseTitle.lowercase() }.distinct().sorted()
-                    val allArtists = filtered.map { item: FavoriteDbo -> item.artistTitle.lowercase() }.distinct().sorted()
-                    filtered.sortedWith(Comparator<FavoriteDbo> { a, b ->
-                        val titleCmp = allTitles.indexOf(a.releaseTitle.lowercase()).compareTo(allTitles.indexOf(b.releaseTitle.lowercase()))
-                        if (titleCmp != 0) titleCmp
-                        else allArtists.indexOf(a.artistTitle.lowercase()).compareTo(allArtists.indexOf(b.artistTitle.lowercase()))
+                    val allTitles = filtered.map { it.release.releaseTitle.lowercase() }.distinct().sorted()
+                    val allArtists = filtered.map { it.release.artistTitle.lowercase() }.distinct().sorted()
+                    filtered.sortedWith(compareBy<FullReleaseDbo> {
+                        allTitles.indexOf(it.release.releaseTitle.lowercase())
+                    }.thenBy {
+                        allArtists.indexOf(it.release.artistTitle.lowercase())
                     })
                 }
             }

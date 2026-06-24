@@ -1,7 +1,7 @@
 package com.example.releases
 
 import android.util.Log
-import com.example.database.dbo.TopReleasesDbo
+import com.example.database.dbo.FullReleaseDbo
 import com.example.network.dto.ReleaseDetailsDto
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.InternalSerializationApi
@@ -16,18 +16,18 @@ class ReleasesRepository @Inject constructor(
 ) {
     private var hasFetchedRelease = false
 
-    @OptIn(InternalSerializationApi::class)
-    fun observeReleases(): Flow<List<TopReleasesDbo>> = releaseLocalDataSource.consumeReleases()
+    fun observeReleases(): Flow<List<FullReleaseDbo>> = releaseLocalDataSource.consumeReleases()
 
     @OptIn(InternalSerializationApi::class)
     suspend fun fetchAndSave() {
         val releases = releaseRemoteDataSource.getReleases()
         releaseLocalDataSource.saveReleases(
-            releases.map(releaseDataMapper::toDbo)
+            releases = releases.map(releaseDataMapper::toDbo),
+            releaseGenres = releases.flatMap(releaseDataMapper::toReleaseGenres),
+            releaseCountries = releases.flatMap(releaseDataMapper::toReleaseCountries)
         )
     }
 
-    @OptIn(InternalSerializationApi::class)
     suspend fun fetchAndSaveIfNeeded() {
         if (hasFetchedRelease) return
         hasFetchedRelease = true

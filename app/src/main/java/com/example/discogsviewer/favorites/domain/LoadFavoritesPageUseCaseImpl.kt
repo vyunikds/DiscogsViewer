@@ -20,13 +20,13 @@ class LoadFavoritesPageUseCaseImpl @Inject constructor(
         return items.map { item ->
             ReleaseWithFavorite(
                 release = Release(
-                    id = item.releaseId.toIntOrNull() ?: 0,
-                    artistTitle = item.artistTitle,
-                    releaseTitle = item.releaseTitle,
-                    country = item.country,
-                    genre = item.genres,
-                    thumb = item.thumb,
-                    coverImage = item.coverImage ?: "",
+                    id = item.releaseId,
+                    artistTitle = item.fullRelease.release.artistTitle,
+                    releaseTitle = item.fullRelease.release.releaseTitle,
+                    country = item.fullRelease.countriesList.firstOrNull()?.country ?: "",
+                    genre = item.fullRelease.genresList.map { it.genre },
+                    thumb = item.fullRelease.release.thumb,
+                    coverImage = item.fullRelease.release.coverImage,
                 ),
                 isFavorite = true,
             )
