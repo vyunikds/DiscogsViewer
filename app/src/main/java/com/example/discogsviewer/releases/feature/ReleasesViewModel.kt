@@ -33,8 +33,8 @@ class ReleasesViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             releasesRepository.fetchAndSaveIfNeeded()
+            collectData()
         }
-        collectData()
     }
 
     private fun collectData() {
