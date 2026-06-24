@@ -14,7 +14,7 @@ data class ReleaseDetailsScreenState(
 )
 
 data class ReleaseDetailsState(
-    val id: Int = 0,
+    val id: String = "",
     val releaseTitle: String = "",
     val artistTitle: String = "",
     val want: Int = 0,

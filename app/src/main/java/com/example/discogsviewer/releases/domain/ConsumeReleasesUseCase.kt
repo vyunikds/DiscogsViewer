@@ -1,11 +1,10 @@
 package com.example.discogsviewer.releases.domain
 
+import com.example.database.dbo.FullReleaseDbo
 import com.example.favorite.FavoritesRepository
 import com.example.releases.ReleasesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,17 +14,16 @@ class ConsumeReleasesUseCase @Inject constructor(
     private val releasesDomainMapper: ReleaseDomainMapper,
     private val favoritesRepository: FavoritesRepository,
 ) {
-    @OptIn(InternalSerializationApi::class)
     operator fun invoke(): Flow<List<ReleaseWithFavorite>> {
         return combine(
             releasesRepository.observeReleases(),
             favoritesRepository.consumeReleaseIds()
-        ) { releases, releaseIds ->
-            releases
-                .map { release ->
+        ) { fullReleases: List<FullReleaseDbo>, releaseIds ->
+            fullReleases
+                .map { fullRelease ->
                     ReleaseWithFavorite(
-                        release = releasesDomainMapper.fromEntity(release),
-                        isFavorite = release.id.toString() in releaseIds
+                        release = releasesDomainMapper.fromEntity(fullRelease),
+                        isFavorite = fullRelease.release.id in releaseIds
                     )
                 }
         }

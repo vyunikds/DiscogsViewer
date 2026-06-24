@@ -10,18 +10,18 @@ class LoadFavoritesPageUseCaseImpl @Inject constructor(
 ) : LoadFavoritesPageUseCase {
 
     override suspend operator fun invoke(sortMode: FavoriteSortMode, limit: Int, offset: Int): List<ReleaseWithFavorite> {
-        val dsSortMode = sortMode.toDataSourceSortMode()
-        val items = favoritesRepository.consumePaginated(dsSortMode, limit, offset)
+        val items = favoritesRepository.consumePaginated(sortMode.toDataSourceSortMode(), limit, offset)
         return items.map { item ->
+            val full = item.fullRelease
             ReleaseWithFavorite(
                 release = Release(
-                    id = item.releaseId.toIntOrNull() ?: 0,
-                    artistTitle = item.artistTitle,
-                    releaseTitle = item.releaseTitle,
-                    country = item.country,
-                    genre = item.genres,
-                    thumb = item.thumb,
-                    coverImage = item.coverImage ?: "",
+                    id = full.release.id,
+                    artistTitle = full.release.artistTitle,
+                    releaseTitle = full.release.releaseTitle,
+                    country = full.countriesList.firstOrNull()?.country ?: "",
+                    genre = full.genresList.map { g -> g.genre },
+                    thumb = full.release.thumb,
+                    coverImage = full.release.coverImage,
                 ),
                 isFavorite = true,
             )

@@ -15,7 +15,7 @@ data class ReleasesScreenState(
 )
 
 data class ReleaseState(
-    val id: Int,
+    val id: String,
     val artistTitle: String,
     val releaseTitle: String,
     val country: String,
@@ -25,7 +25,7 @@ data class ReleaseState(
     val isFavorite: Boolean,
 ) {
     fun toReleaseCardState(): ReleaseCardState = ReleaseCardState(
-        id = id.toString(),
+        id = id,
         artistTitle = artistTitle,
         releaseTitle = releaseTitle,
         country = country,

@@ -2,6 +2,7 @@ package com.example.favorite
 
 import com.example.database.dao.FavoritesDao
 import com.example.database.dbo.FavoriteDbo
+import com.example.database.dbo.FullReleaseDbo
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,13 +17,11 @@ enum class DataSourceSortMode {
 class FavoritesLocalDataSource @Inject constructor(
     private val favoritesDao: FavoritesDao,
 ) {
-    fun consumeAll(): Flow<List<FavoriteDbo>> = favoritesDao.getAll()
-
     fun consumeReleaseIds(): Flow<List<String>> = favoritesDao.getReleaseIds()
 
     fun consumeCount(): Flow<Int> = favoritesDao.getCount()
 
-    suspend fun consumePaginated(sortMode: DataSourceSortMode, limit: Int, offset: Int): List<FavoriteDbo> =
+    suspend fun consumePaginated(sortMode: DataSourceSortMode, limit: Int, offset: Int): List<FullReleaseDbo> =
         when (sortMode) {
             DataSourceSortMode.BY_DATE -> favoritesDao.getPaginatedByDate(limit, offset)
             DataSourceSortMode.BY_ARTIST_TITLE -> favoritesDao.getPaginatedByArtistTitle(limit, offset)

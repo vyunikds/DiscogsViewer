@@ -71,7 +71,6 @@ fun FavoritesScreen(
         Row(
             modifier = Modifier
                 .align(Alignment.End),
-//                .padding(vertical = 12.dp),
         ) {
             IconButton(
                 modifier = Modifier
@@ -120,10 +119,8 @@ fun FavoritesScreen(
             androidx.compose.foundation.Image(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally),
-//                    .size(400.dp),
                 painter = androidx.compose.ui.res.painterResource(R.drawable.fav_landscape),
                 contentDescription = stringResource(R.string.favorites_image_desc),
-//                contentScale = ContentScale.Crop,
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surfaceTint),
             )
             Text(
@@ -168,7 +165,6 @@ fun FavoritesScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         state = listState,
-//                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(
                             items = state.favorites,

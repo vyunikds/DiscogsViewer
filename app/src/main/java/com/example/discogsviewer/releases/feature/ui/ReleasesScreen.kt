@@ -22,8 +22,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.discogsviewer.releases.feature.ReleaseState
 import com.example.discogsviewer.releases.feature.ReleasesScreenState
-import com.example.discogsviewer.ui.common.ReleaseSmallCard
-import com.example.discogsviewer.ui.common.ReleaseSmallCardMode
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,7 +85,7 @@ private fun ReleasesScreenWithDataPreview() {
         state = ReleasesScreenState(
             releasesListState = listOf(
                 ReleaseState(
-                    id = 0,
+                    id = "0",
                     artistTitle = "Artist Title",
                     releaseTitle = "Release Title",
                     country = "UK",
