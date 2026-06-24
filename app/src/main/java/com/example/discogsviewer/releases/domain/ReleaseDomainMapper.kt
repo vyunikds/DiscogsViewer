@@ -1,21 +1,20 @@
 package com.example.discogsviewer.releases.domain
 
-import com.example.database.dbo.TopReleasesDbo
-import kotlinx.serialization.InternalSerializationApi
+import com.example.database.dbo.FullReleaseDbo
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class ReleaseDomainMapper @Inject constructor() {
-    @OptIn(InternalSerializationApi::class)
-    fun fromEntity(releaseDbo: TopReleasesDbo): Release {
+    fun fromEntity(fullRelease: FullReleaseDbo): Release {
         return Release(
-            artistTitle = releaseDbo.artistTitle,
-            releaseTitle = releaseDbo.releaseTitle,
-            country = releaseDbo.country,
-            genre = releaseDbo.genres,
-            id = releaseDbo.id,
-            thumb = releaseDbo.thumb,
+            id = fullRelease.release.id,
+            artistTitle = fullRelease.release.artistTitle,
+            releaseTitle = fullRelease.release.releaseTitle,
+            country = fullRelease.countriesList.firstOrNull()?.country ?: "",
+            genre = fullRelease.genresList.map { it.genre },
+            thumb = fullRelease.release.thumb,
+            coverImage = fullRelease.release.coverImage,
         )
     }
 }

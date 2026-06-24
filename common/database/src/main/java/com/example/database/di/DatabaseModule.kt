@@ -1,9 +1,10 @@
 package com.example.database.di
 
 import android.content.Context
+import androidx.room.Room
 import com.example.database.AppDatabase
 import com.example.database.dao.FavoritesDao
-import com.example.database.dao.TopReleasesDao
+import com.example.database.dao.ReleaseDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,12 +19,18 @@ object DatabaseModule {
     fun provideDatabase(
         @ApplicationContext context: Context
     ): AppDatabase {
-        return AppDatabase.getInstance(context)
+        return Room.databaseBuilder(
+            context.applicationContext,
+            AppDatabase::class.java,
+            DATABASE_NAME
+        ).fallbackToDestructiveMigration(false).build()
     }
 
     @Provides
-    fun provideTopReleasesDao(database: AppDatabase): TopReleasesDao = database.getTopReleasesDao()
+    fun provideReleaseDao(database: AppDatabase): ReleaseDao = database.getReleaseDao()
 
     @Provides
     fun provideFavoritesDao(database: AppDatabase): FavoritesDao = database.getFavoritesDao()
 }
+
+private const val DATABASE_NAME = "discogs_database"

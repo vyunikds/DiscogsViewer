@@ -1,23 +1,41 @@
 package com.example.releases
 
-import com.example.database.dao.TopReleasesDao
-import com.example.database.dbo.TopReleasesDbo
+import androidx.room.Transaction
+import com.example.database.dao.ReleaseDao
+import com.example.database.dbo.CountryDbo
+import com.example.database.dbo.FullReleaseDbo
+import com.example.database.dbo.GenreDbo
+import com.example.database.dbo.ReleaseCountryDbo
+import com.example.database.dbo.ReleaseDbo
+import com.example.database.dbo.ReleaseGenreDbo
 import kotlinx.coroutines.flow.Flow
-import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class ReleasesLocalDataSource @Inject constructor(
-    private val discogsDao: TopReleasesDao,
+    private val releaseDao: ReleaseDao,
 ) {
-    @OptIn(InternalSerializationApi::class)
-    fun consumeReleases(): Flow<List<TopReleasesDbo>> = discogsDao.getAllReleases()
+    fun consumeReleases(): Flow<List<FullReleaseDbo>> = releaseDao.getAllReleases()
 
-    @OptIn(InternalSerializationApi::class)
-    suspend fun saveReleases(releases: List<TopReleasesDbo>) {
-        discogsDao.insertReleases(releases)
+    @Transaction
+    suspend fun saveReleases(
+        releases: List<ReleaseDbo>,
+        releaseGenres: List<ReleaseGenreDbo>,
+        releaseCountries: List<ReleaseCountryDbo>
+    ) {
+        releaseDao.insertGenres(toGenres(releaseGenres))
+        releaseDao.insertCountries(toCountries(releaseCountries))
+        releaseDao.insertReleases(releases)
+        releaseDao.insertReleaseGenres(releaseGenres)
+        releaseDao.insertReleaseCountries(releaseCountries)
     }
 
-    suspend fun getThumb(releaseId: Int): String? = discogsDao.getThumb(releaseId)
+    suspend fun getThumb(releaseId: String): String? = releaseDao.getThumb(releaseId)
+
+    private fun toGenres(releaseGenres: List<ReleaseGenreDbo>): List<GenreDbo> =
+        releaseGenres.map { GenreDbo(it.genre) }.distinctBy { it.genre }
+
+    private fun toCountries(releaseCountries: List<ReleaseCountryDbo>): List<CountryDbo> =
+        releaseCountries.map { CountryDbo(it.country) }.distinctBy { it.country }
 }

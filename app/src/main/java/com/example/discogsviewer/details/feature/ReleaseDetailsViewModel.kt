@@ -3,9 +3,11 @@ package com.example.discogsviewer.details.feature
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.database.dbo.ReleaseCountryDbo
+import com.example.database.dbo.ReleaseDbo
+import com.example.database.dbo.ReleaseGenreDbo
 import com.example.discogsviewer.R
 import com.example.discogsviewer.details.domain.ConsumeReleaseDetailsUseCase
-import com.example.favorite.FavoriteItem
 import com.example.favorite.ToggleFavoriteUseCase
 import com.example.releases.ReleasesLocalDataSource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,7 +37,7 @@ class ReleaseDetailsViewModel @Inject constructor(
     private val releaseId: String =
         checkNotNull(savedStateHandle["releaseId"]) { "releaseId must not be null" }
 
-    private val _state = MutableStateFlow(ReleaseDetailsScreenState())
+    private val _state = MutableStateFlow<ReleaseDetailsScreenState>(ReleaseDetailsScreenState())
     val state: StateFlow<ReleaseDetailsScreenState> = _state.asStateFlow()
 
     init {
@@ -77,36 +79,37 @@ class ReleaseDetailsViewModel @Inject constructor(
         requestProducts()
     }
 
-    fun onToggleFavorite(releaseId: String, isFavorite: Boolean) {
+    fun onToggleFavorite(productId: String, isFavorite: Boolean) {
         viewModelScope.launch {
-            val details = state.value.detailsState
-            val oldFavoriteState = details.isFavorite
-            val newFavoriteState = isFavorite
+            val oldFavoriteState = state.value.detailsState.isFavorite
             _state.update { screenState ->
                 screenState.copy(
-                    detailsState = screenState.detailsState.copy(isFavorite = newFavoriteState)
+                    detailsState = screenState.detailsState.copy(isFavorite = isFavorite)
                 )
             }
-            val thumb = try {
-                releasesLocalDataSource.getThumb(details.id)
-            } catch (_: Exception) {
-                null
+
+            if (isFavorite) {
+                val details = state.value.detailsState
+                try {
+                    val dbo = ReleaseDbo(
+                        id = productId,
+                        artistTitle = details.artistTitle,
+                        releaseTitle = details.releaseTitle,
+                        thumb = "",
+                        coverImage = details.coverImage,
+                        communityHave = details.have,
+                        communityWant = details.want,
+                    )
+                    val genres = details.genres.map { ReleaseGenreDbo(productId, it) }
+                    val countries = listOf(ReleaseCountryDbo(productId, details.country))
+                    releasesLocalDataSource.saveReleases(listOf(dbo), genres, countries)
+                } catch (_: Exception) {
+                }
             }
-            val item = FavoriteItem(
-                releaseId = releaseId,
-                artistTitle = details.artistTitle,
-                releaseTitle = details.releaseTitle,
-                country = details.country,
-                genres = details.genres,
-                thumb = thumb ?: "",
-                coverImage = details.coverImage,
-                communityHave = details.have,
-                communityWant = details.want,
-                addedAt = System.currentTimeMillis(),
-            )
+
             try {
-                toggleFavoriteUseCase(item, newFavoriteState)
-            } catch (e: Exception) {
+                toggleFavoriteUseCase(productId, System.currentTimeMillis(), isFavorite)
+            } catch (_: Exception) {
                 _state.update { screenState ->
                     screenState.copy(
                         detailsState = screenState.detailsState.copy(isFavorite = oldFavoriteState)

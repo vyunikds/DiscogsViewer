@@ -14,6 +14,7 @@ class ReleasesStateFactory @Inject constructor() {
             thumb = release.release.thumb,
             artistTitle = release.release.artistTitle,
             genre = release.release.genre,
+            coverImage = release.release.coverImage,
             isFavorite = release.isFavorite,
         )
     }

@@ -1,7 +1,7 @@
 package com.example.discogsviewer.releases.domain
 
-data class Release (
-    val id: Int,
+data class Release(
+    val id: String,
     val artistTitle: String,
     val releaseTitle: String,
     val country: String,

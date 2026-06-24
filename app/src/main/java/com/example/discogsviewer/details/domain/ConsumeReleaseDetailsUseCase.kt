@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Inject
 
+@OptIn(InternalSerializationApi::class)
 class ConsumeReleaseDetailsUseCase @Inject constructor(
     private val releasesRepository: ReleasesRepository,
     private val releasesDetailsDomainMapper: ReleaseDetailsDomainMapper,
     private val favoritesRepository: FavoritesRepository,
 ) {
-    @OptIn(InternalSerializationApi::class)
     operator fun invoke(releaseId: String): Flow<ReleaseDetails> = flow {
         val dto = releasesRepository.getReleaseById(releaseId.toInt())
         val releaseIds = favoritesRepository.consumeReleaseIds().first()
