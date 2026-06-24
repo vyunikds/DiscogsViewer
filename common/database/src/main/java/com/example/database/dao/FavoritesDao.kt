@@ -16,6 +16,9 @@ interface FavoritesDao {
     @Query("SELECT * FROM releases WHERE release_id IN (SELECT releaseId FROM favorites)")
     fun getAllFull(): Flow<List<FullReleaseDbo>>
 
+    @Query("SELECT * FROM favorites")
+    fun getAll(): Flow<List<FavoriteDbo>>
+
     @Query("SELECT COUNT(*) FROM favorites")
     fun getCount(): Flow<Int>
 

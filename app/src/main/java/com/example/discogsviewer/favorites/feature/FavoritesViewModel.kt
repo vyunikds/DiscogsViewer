@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -29,6 +30,7 @@ class FavoritesViewModel @Inject constructor(
     val state: StateFlow<FavoritesScreenState> = _state.asStateFlow()
 
     private var currentSortMode = FavoriteSortMode.BY_DATE
+    private var selectedGenre: String? = null
     private val pageSize = 20
 
     fun setSortMode(mode: FavoriteSortMode) {
@@ -37,10 +39,23 @@ class FavoritesViewModel @Inject constructor(
         resetAndReload()
     }
 
+    fun setGenreFilter(genre: String?) {
+        selectedGenre = genre
+        _state.update { it.copy(selectedGenre = genre) }
+        resetAndReload()
+    }
+
     init {
         favoritesRepository.consumeCount()
             .onEach { count ->
-                _state.update { it.copy(totalCount = count) }
+                if (selectedGenre == null) {
+                    _state.update { it.copy(totalCount = count) }
+                }
+            }
+            .launchIn(viewModelScope)
+        favoritesRepository.consumeFavoriteGenres()
+            .onEach { genres ->
+                _state.update { it.copy(availableGenres = genres) }
             }
             .launchIn(viewModelScope)
         loadPage(0)
@@ -82,12 +97,23 @@ class FavoritesViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val releasesWithFavorite = loadFavoritesPageUseCase(currentSortMode, pageSize, offset)
+                val releasesWithFavorite = loadFavoritesPageUseCase(
+                    currentSortMode,
+                    pageSize,
+                    offset,
+                    selectedGenre,
+                )
                 val states = favoritesStateFactory.create(releasesWithFavorite)
                 val hasNext = releasesWithFavorite.size == pageSize
+                val count = if (selectedGenre != null) {
+                    favoritesRepository.getFilteredGenreCount(selectedGenre!!)
+                } else {
+                    favoritesRepository.consumeCount().first()
+                }
                 _state.update {
                     it.copy(
                         favorites = if (requestedPage == 0) states else it.favorites + states,
+                        totalCount = count,
                         isLoading = false,
                         isLoadingMore = false,
                         hasNextPage = hasNext,

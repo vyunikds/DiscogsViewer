@@ -17,6 +17,8 @@ data class FavoritesScreenState(
     val hasError: Boolean = false,
     val errorProvider: ErrorProvider = { "" },
     val currentSortMode: FavoriteSortMode = FavoriteSortMode.BY_DATE,
+    val availableGenres: List<String> = emptyList(),
+    val selectedGenre: String? = null,
 )
 
 data class FavoriteReleasesState(

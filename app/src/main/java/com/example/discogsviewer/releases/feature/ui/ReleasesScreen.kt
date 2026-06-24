@@ -11,6 +11,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,8 +20,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.discogsviewer.R
 import com.example.discogsviewer.releases.feature.ReleaseState
 import com.example.discogsviewer.releases.feature.ReleasesScreenState
 
@@ -69,8 +74,18 @@ fun ReleasesScreen(
                 }
             }
 
-            if (state.isLoading && state.releasesListState.isEmpty()) {
+            if ((!state.isInitialized || state.isLoading) && state.releasesListState.isEmpty()) {
                 CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+
+            if (state.isInitialized && !state.isLoading && state.releasesListState.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.releases_empty_error),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.align(Alignment.Center)
                 )
             }

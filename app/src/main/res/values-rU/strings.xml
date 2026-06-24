@@ -44,6 +44,12 @@
     <string name="sort_by_release_title">По названию релиза</string>
     <string name="sort_by_artist_title">По названию артиста</string>
 
+    <!-- Genre Filter -->
+    <string name="genre_all">Всё</string>
+
+    <!-- Search -->
+    <string name="empty_search_history">История поиска пуста. Начните искать…</string>
+
     <!-- Details -->
     <string name="try_again">Попробовать снова</string>
     <string name="image_not_available">Изображение недоступно</string>
@@ -62,4 +68,5 @@
 
     <!-- Errors -->
     <string name="error_unknown">Неизвестная ошибка</string>
+    <string name="releases_empty_error">Что-то пошло не так. Попробуйте позже</string>
 </resources>

@@ -2,10 +2,14 @@ package com.example.discogsviewer.favorites.domain
 
 import com.example.discogsviewer.releases.domain.ReleaseWithFavorite
 import com.example.favorite.DataSourceSortMode
-import kotlinx.coroutines.flow.Flow
 
 interface LoadFavoritesPageUseCase {
-    suspend operator fun invoke(sortMode: FavoriteSortMode, limit: Int, offset: Int): List<ReleaseWithFavorite>
+    suspend operator fun invoke(
+        sortMode: FavoriteSortMode,
+        limit: Int,
+        offset: Int,
+        genre: String? = null,
+    ): List<ReleaseWithFavorite>
 }
 
 internal fun FavoriteSortMode.toDataSourceSortMode(): DataSourceSortMode =

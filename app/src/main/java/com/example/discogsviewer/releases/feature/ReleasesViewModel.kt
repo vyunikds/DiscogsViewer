@@ -33,8 +33,8 @@ class ReleasesViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             releasesRepository.fetchAndSaveIfNeeded()
+            collectData()
         }
-        collectData()
     }
 
     private fun collectData() {
@@ -43,12 +43,16 @@ class ReleasesViewModel @Inject constructor(
         }
             .onEach { releaseListState ->
                 _state.update { screenState ->
-                    screenState.copy(releasesListState = releaseListState)
+                    screenState.copy(
+                        isInitialized = true,
+                        releasesListState = releaseListState
+                    )
                 }
             }
             .catch {
                 _state.update { screenState ->
                     screenState.copy(
+                        isInitialized = true,
                         hasError = true,
                         errorProvider = { context -> context.getString(R.string.error_while_loading_data) }
                     )
