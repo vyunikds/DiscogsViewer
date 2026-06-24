@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.discogsviewer.R
 import com.example.discogsviewer.favorites.domain.FavoriteSortMode
 import com.example.discogsviewer.favorites.domain.LoadFavoritesPageUseCase
-import com.example.favorite.FavoriteItem
 import com.example.favorite.FavoritesRepository
 import com.example.favorite.ToggleFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +26,7 @@ class FavoritesViewModel @Inject constructor(
     private val favoritesRepository: FavoritesRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(FavoritesScreenState())
+    private val _state = MutableStateFlow<FavoritesScreenState>(FavoritesScreenState())
     val state: StateFlow<FavoritesScreenState> = _state.asStateFlow()
 
     private var currentSortMode = FavoriteSortMode.BY_DATE
@@ -71,20 +70,7 @@ class FavoritesViewModel @Inject constructor(
 
     fun onRemoveFavorite(productId: String) {
         viewModelScope.launch {
-            val favoriteState = state.value.favorites.find { it.id == productId } ?: return@launch
-            val item = FavoriteItem(
-                releaseId = productId,
-                artistTitle = favoriteState.artistTitle,
-                releaseTitle = favoriteState.releaseTitle,
-                country = favoriteState.country,
-                genres = favoriteState.genre,
-                thumb = favoriteState.thumb,
-                coverImage = null,
-                communityHave = 0,
-                communityWant = 0,
-                addedAt = 0L,
-            )
-            toggleFavoriteUseCase(item, false)
+            toggleFavoriteUseCase(productId, 0L, false)
             resetAndReload()
         }
     }

@@ -2,11 +2,14 @@ package com.example.discogsviewer.search.feature
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.database.dbo.ReleaseCountryDbo
+import com.example.database.dbo.ReleaseDbo
+import com.example.database.dbo.ReleaseGenreDbo
 import com.example.discogsviewer.R
 import com.example.discogsviewer.search.domain.ConsumeReleasesSearchUseCase
 import com.example.discogsviewer.search.domain.SearchResultPage
-import com.example.favorite.FavoriteItem
 import com.example.favorite.ToggleFavoriteUseCase
+import com.example.releases.ReleasesLocalDataSource
 import com.example.settings.SearchHistoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -20,7 +23,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,6 +31,7 @@ class ReleaseSearchViewModel @Inject constructor(
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val releasesSearchStateFactory: ReleasesSearchStateFactory,
     private val searchHistoryRepository: SearchHistoryRepository,
+    private val releasesLocalDataSource: ReleasesLocalDataSource,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ReleasesSearchScreenState())
@@ -47,7 +50,6 @@ class ReleaseSearchViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    @OptIn(InternalSerializationApi::class)
     fun onSearchQueryChanged(query: String) {
         _state.update { screenState ->
             screenState.copy(searchQuery = query)
@@ -87,7 +89,6 @@ class ReleaseSearchViewModel @Inject constructor(
 
     private var currentPage = 1
 
-    @OptIn(InternalSerializationApi::class)
     private fun requestReleases(searchQuery: String) {
         requestJob?.cancel()
         currentPage = 1
@@ -135,15 +136,15 @@ class ReleaseSearchViewModel @Inject constructor(
                         val newItems = mapSearchResultPage(page)
                         _state.update { screenState ->
                             val existingIds = screenState.releasesSearchListState.mapTo(mutableSetOf()) { it.id }
-                            val uniqueNew = newItems.filter { it.id !in existingIds }
+                            val uniqueNewItems = newItems.filter { it.id !in existingIds }
                             screenState.copy(
                                 isLoadingMore = false,
-                                releasesSearchListState = screenState.releasesSearchListState + uniqueNew,
+                                releasesSearchListState = screenState.releasesSearchListState + uniqueNewItems,
                                 hasNextPage = page.hasNextPage,
                             )
                         }
                     }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _state.update {
                     it.copy(
                         isLoadingMore = false,
@@ -158,7 +159,6 @@ class ReleaseSearchViewModel @Inject constructor(
     private fun mapSearchResultPage(page: SearchResultPage): List<ReleaseSearchState> {
         return page.releases.map { releasesSearchStateFactory.create(it) }
     }
-
 
     fun removeHistoryItem(query: String) {
         viewModelScope.launch {
@@ -178,20 +178,25 @@ class ReleaseSearchViewModel @Inject constructor(
 
     fun onToggleFavorite(releaseId: String, isFavorite: Boolean) {
         viewModelScope.launch {
-            val releaseState = state.value.releasesSearchListState.find { it.id == releaseId } ?: return@launch
-            val item = FavoriteItem(
-                releaseId = releaseId,
-                artistTitle = releaseState.artistTitle,
-                releaseTitle = releaseState.releaseTitle,
-                country = releaseState.country,
-                genres = releaseState.genre,
-                thumb = releaseState.thumb,
-                coverImage = "",
-                communityHave = 0,
-                communityWant = 0,
-                addedAt = System.currentTimeMillis(),
-            )
-            toggleFavoriteUseCase(item, isFavorite)
+            if (isFavorite) {
+                val releaseState = state.value.releasesSearchListState.find { it.id == releaseId }
+                if (releaseState != null) {
+                    try {
+                        val dbo = ReleaseDbo(
+                            id = releaseState.id,
+                            artistTitle = releaseState.artistTitle,
+                            releaseTitle = releaseState.releaseTitle,
+                            thumb = releaseState.thumb,
+                            coverImage = releaseState.coverImage,
+                        )
+                        val genres = releaseState.genre.map { ReleaseGenreDbo(releaseState.id, it) }
+                        val countries = listOf(ReleaseCountryDbo(releaseState.id, releaseState.country))
+                        releasesLocalDataSource.saveReleases(listOf(dbo), genres, countries)
+                    } catch (_: Exception) {
+                    }
+                }
+            }
+            toggleFavoriteUseCase(releaseId, System.currentTimeMillis(), isFavorite)
         }
     }
 }

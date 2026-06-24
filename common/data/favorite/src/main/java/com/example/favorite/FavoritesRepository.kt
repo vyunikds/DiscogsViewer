@@ -3,7 +3,6 @@ package com.example.favorite
 import kotlinx.coroutines.flow.Flow
 
 interface FavoritesRepository {
-    fun consumeAllFavorites(): Flow<List<FavoriteItem>>
     fun consumeReleaseIds(): Flow<List<String>>
     fun consumeCount(): Flow<Int>
     fun consumeFavoriteGenres(): Flow<List<String>>
@@ -12,7 +11,7 @@ interface FavoritesRepository {
         limit: Int,
         offset: Int,
         genre: String? = null,
-    ): List<FavoriteItem>
+    ): List<FavoriteReleaseItem>
 
     suspend fun getFilteredGenreCount(genre: String): Int
     suspend fun addToFavorites(item: FavoriteItem)

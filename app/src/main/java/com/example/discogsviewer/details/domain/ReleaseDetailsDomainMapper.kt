@@ -1,27 +1,11 @@
 package com.example.discogsviewer.details.domain
 
-import com.example.database.dbo.TopReleasesDbo
 import com.example.network.dto.ReleaseDetailsDto
 import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Inject
 
+@OptIn(InternalSerializationApi::class)
 class ReleaseDetailsDomainMapper @Inject constructor() {
-    @OptIn(InternalSerializationApi::class)
-    fun fromEntity(releaseDbo: TopReleasesDbo): ReleaseDetails {
-        return ReleaseDetails(
-            releaseTitle = releaseDbo.releaseTitle,
-            country = releaseDbo.country,
-            genres = releaseDbo.genres,
-            id = releaseDbo.id,
-            coverImage = releaseDbo.coverImage,
-            isFavorite = false,
-            artistTitle = releaseDbo.artistTitle,
-            want = releaseDbo.communityHave,
-            have = releaseDbo.communityWant,
-        )
-    }
-
-    @OptIn(InternalSerializationApi::class)
     fun fromDto(releaseDto: ReleaseDetailsDto): ReleaseDetails {
         val artistName = releaseDto.artistsNames.firstOrNull { it.isNotBlank() }
             ?: releaseDto.artists.firstOrNull { it.name.isNotBlank() }?.name
@@ -32,7 +16,7 @@ class ReleaseDetailsDomainMapper @Inject constructor() {
             ?: releaseDto.thumb
             ?: releaseDto.coverImage
         return ReleaseDetails(
-            id = releaseDto.id,
+            id = releaseDto.id.toString(),
             releaseTitle = releaseDto.title,
             artistTitle = artistName,
             country = releaseDto.country,

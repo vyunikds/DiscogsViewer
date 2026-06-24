@@ -2,6 +2,7 @@ package com.example.favorite
 
 import com.example.database.dao.FavoritesDao
 import com.example.database.dbo.FavoriteDbo
+import com.example.database.dbo.FullReleaseDbo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -18,8 +19,6 @@ enum class DataSourceSortMode {
 class FavoritesLocalDataSource @Inject constructor(
     private val favoritesDao: FavoritesDao,
 ) {
-    fun consumeAll(): Flow<List<FavoriteDbo>> = favoritesDao.getAll()
-
     fun consumeReleaseIds(): Flow<List<String>> = favoritesDao.getReleaseIds()
 
     fun consumeCount(): Flow<Int> = favoritesDao.getCount()
@@ -44,7 +43,7 @@ class FavoritesLocalDataSource @Inject constructor(
         limit: Int,
         offset: Int,
         genre: String? = null,
-    ): List<FavoriteDbo> {
+    ): List<FullReleaseDbo> {
         if (genre != null) {
             val filtered = favoritesDao.getAll()
                 .first()

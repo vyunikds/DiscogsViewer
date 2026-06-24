@@ -8,7 +8,7 @@ import javax.inject.Singleton
 class ReleasesSearchStateFactory @Inject constructor() {
     fun create(release: ReleaseSearchWithFavorite): ReleaseSearchState {
         return ReleaseSearchState(
-            id = release.release.id.toString(),
+            id = release.release.id,
             releaseTitle = release.release.releaseTitle,
             country = release.release.country,
             thumb = release.release.thumb,

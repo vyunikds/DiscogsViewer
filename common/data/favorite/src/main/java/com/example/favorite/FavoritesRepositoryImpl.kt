@@ -2,16 +2,11 @@ package com.example.favorite
 
 import com.example.database.dbo.FavoriteDbo
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class FavoritesRepositoryImpl @Inject constructor(
     private val localDataSource: FavoritesLocalDataSource,
-    private val mapper: FavoriteDboMapper,
 ) : FavoritesRepository {
-    override fun consumeAllFavorites(): Flow<List<FavoriteItem>> =
-        localDataSource.consumeAll().map { list -> list.map(mapper::toDomain) }
-
     override fun consumeReleaseIds(): Flow<List<String>> =
         localDataSource.consumeReleaseIds()
 
@@ -27,15 +22,24 @@ class FavoritesRepositoryImpl @Inject constructor(
     override suspend fun consumePaginated(
         sortMode: DataSourceSortMode,
         limit: Int,
-        offset: Int,
-        genre: String?,
-    ): List<FavoriteItem> {
-        val dbos = localDataSource.consumePaginated(sortMode, limit, offset, genre)
-        return dbos.map(mapper::toDomain)
+        offset: Int
+    ): List<FavoriteReleaseItem> {
+        val fullReleases = localDataSource.consumePaginated(sortMode, limit, offset)
+        return fullReleases.map { fullRelease ->
+            FavoriteReleaseItem(
+                releaseId = fullRelease.release.id,
+                fullRelease = fullRelease,
+            )
+        }
     }
 
     override suspend fun addToFavorites(item: FavoriteItem) {
-        localDataSource.add(toDbo(item))
+        localDataSource.add(
+            FavoriteDbo(
+                releaseId = item.releaseId,
+                addedAt = item.addedAt,
+            )
+        )
     }
 
     override suspend fun removeFromFavorites(releaseId: String) {

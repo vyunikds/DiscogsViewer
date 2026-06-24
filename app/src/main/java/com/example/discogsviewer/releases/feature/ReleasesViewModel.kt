@@ -3,10 +3,10 @@ package com.example.discogsviewer.releases.feature
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.discogsviewer.R
-import com.example.favorite.FavoriteItem
 import com.example.favorite.ToggleFavoriteUseCase
 import com.example.releases.ReleasesRepository
 import com.example.discogsviewer.releases.domain.ConsumeReleasesUseCase
+import com.example.discogsviewer.releases.domain.ReleaseWithFavorite
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,7 +27,7 @@ class ReleasesViewModel @Inject constructor(
     private val releasesRepository: ReleasesRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(ReleasesScreenState())
+    private val _state = MutableStateFlow<ReleasesScreenState>(ReleasesScreenState())
     val state: StateFlow<ReleasesScreenState> = _state.asStateFlow()
 
     init {
@@ -38,9 +37,8 @@ class ReleasesViewModel @Inject constructor(
         collectData()
     }
 
-    @OptIn(InternalSerializationApi::class)
     private fun collectData() {
-        consumeReleasesUseCase().map { releases ->
+        consumeReleasesUseCase().map { releases: List<ReleaseWithFavorite> ->
             releases.map { release -> releasesStateFactory.create(release) }
         }
             .onEach { releaseListState ->
@@ -88,20 +86,7 @@ class ReleasesViewModel @Inject constructor(
 
     fun onToggleFavorite(releaseId: String, isFavorite: Boolean) {
         viewModelScope.launch {
-            val releaseState = state.value.releasesListState.find { it.id.toString() == releaseId } ?: return@launch
-            val item = FavoriteItem(
-                releaseId = releaseId,
-                artistTitle = releaseState.artistTitle,
-                releaseTitle = releaseState.releaseTitle,
-                country = releaseState.country,
-                genres = releaseState.genre,
-                thumb = releaseState.thumb,
-                coverImage = "",
-                communityHave = 0,
-                communityWant = 0,
-                addedAt = System.currentTimeMillis(),
-            )
-            toggleFavoriteUseCase(item, isFavorite)
+            toggleFavoriteUseCase(releaseId, System.currentTimeMillis(), isFavorite)
         }
     }
 }

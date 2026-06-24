@@ -12,7 +12,7 @@ class FavoritesStateFactory @Inject constructor() {
 
     private fun createFavoriteState(releaseWithFavorite: ReleaseWithFavorite): FavoriteReleasesState {
         return FavoriteReleasesState(
-            id = releaseWithFavorite.release.id.toString(),
+            id = releaseWithFavorite.release.id,
             artistTitle = releaseWithFavorite.release.artistTitle,
             releaseTitle = releaseWithFavorite.release.releaseTitle,
             country = releaseWithFavorite.release.country,

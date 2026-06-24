@@ -6,11 +6,11 @@ class ToggleFavoriteUseCaseImpl @Inject constructor(
     private val favoritesRepository: FavoritesRepository,
 ) : ToggleFavoriteUseCase {
 
-    override suspend fun invoke(item: FavoriteItem, isFavorite: Boolean) {
+    override suspend fun invoke(releaseId: String, addedAt: Long, isFavorite: Boolean) {
         if (isFavorite) {
-            favoritesRepository.addToFavorites(item)
+            favoritesRepository.addToFavorites(FavoriteItem(releaseId, addedAt))
         } else {
-            favoritesRepository.removeFromFavorites(item.releaseId)
+            favoritesRepository.removeFromFavorites(releaseId)
         }
     }
 }

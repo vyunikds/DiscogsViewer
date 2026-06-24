@@ -100,7 +100,7 @@ private fun ReleasesScreenWithDataPreview() {
         state = ReleasesScreenState(
             releasesListState = listOf(
                 ReleaseState(
-                    id = 0,
+                    id = "0",
                     artistTitle = "Artist Title",
                     releaseTitle = "Release Title",
                     country = "UK",
