@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.database.AppDatabase
 import com.example.database.dao.FavoritesDao
 import com.example.database.dao.ReleaseDao
+import com.example.database.migrations.MIGRATION_3_4
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,7 +24,9 @@ object DatabaseModule {
             context.applicationContext,
             AppDatabase::class.java,
             DATABASE_NAME
-        ).fallbackToDestructiveMigration(false).build()
+        ).addMigrations(MIGRATION_3_4)
+         .fallbackToDestructiveMigration()
+         .build()
     }
 
     @Provides

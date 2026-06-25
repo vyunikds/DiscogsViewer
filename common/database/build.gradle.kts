@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.hilt)
     kotlin("kapt")
-    alias(libs.plugins.serialization)
 }
 
 android {
@@ -36,7 +35,8 @@ dependencies {
     implementation(libs.bundles.common.database.implementation)
     kapt(libs.bundles.common.database.kapt)
 
-//    testImplementation(libs.junit)
-//    androidTestImplementation(libs.androidx.espresso.core)
-//    androidTestImplementation(libs.androidx.junit)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlin.test.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.junit)
 }
