@@ -16,7 +16,7 @@ class ConsumeReleasesUseCase @Inject constructor(
 ) {
     operator fun invoke(): Flow<List<ReleaseWithFavorite>> {
         return combine(
-            releasesRepository.observeReleases(),
+            releasesRepository.observeTopReleases(),
             favoritesRepository.consumeReleaseIds()
         ) { fullReleases: List<FullReleaseDbo>, releaseIds ->
             fullReleases
