@@ -1,0 +1,33 @@
+package com.example.feature.favorites.domain
+
+import com.example.favorite.FavoritesRepository
+import javax.inject.Inject
+
+class LoadFavoritesPageUseCaseImpl @Inject constructor(
+    private val favoritesRepository: FavoritesRepository,
+) : LoadFavoritesPageUseCase {
+
+    override suspend operator fun invoke(
+        sortMode: FavoriteSortMode,
+        limit: Int,
+        offset: Int,
+        genre: String?,
+    ): List<ReleaseWithFavorite> {
+        val dsSortMode = sortMode.toDataSourceSortMode()
+        val items = favoritesRepository.consumePaginated(dsSortMode, limit, offset, genre)
+        return items.map { item ->
+            ReleaseWithFavorite(
+                release = Release(
+                    id = item.releaseId,
+                    artistTitle = item.artistTitle,
+                    releaseTitle = item.releaseTitle,
+                    country = item.country,
+                    genre = item.genres,
+                    thumb = item.thumb,
+                    coverImage = item.coverImage,
+                ),
+                isFavorite = true,
+            )
+        }
+    }
+}

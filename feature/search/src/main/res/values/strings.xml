@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_placeholder">Search releases…</string>
+    <string name="clear">Clear</string>
+    <string name="clear_all_history">Clear all history</string>
+    <string name="empty_search_history">Search history is empty. Start searching…</string>
+    <string name="error_while_loading_data">Error while loading data</string>
+    <string name="delete">Delete</string>
+</resources>
