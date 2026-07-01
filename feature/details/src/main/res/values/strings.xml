@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="back">Back</string>
+    <string name="share_via">Share via</string>
+    <string name="try_again">Try again</string>
+    <string name="image_not_available">Image not available</string>
+    <string name="already_have">%1$s already have</string>
+    <string name="label_artist_name">Artist name:</string>
+    <string name="label_genres">Genres:</string>
+    <string name="label_country">Country:</string>
+    <string name="label_release_id">Release ID:</string>
+    <string name="error_while_loading_data">Error while loading data</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_while_loading_data">Error while loading data</string>
+    <string name="releases_empty_error">Something went wrong. Try again later</string>
+    <string name="image_not_available">Image not available</string>
+    <string name="add_favorite_desc">Add to favorites</string>
+</resources>

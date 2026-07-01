@@ -44,45 +44,26 @@ android {
     buildFeatures {
         compose = true
     }
-
-
-// Решение проблемы с дубликатами аннотаций
-    configurations.all {
-        resolutionStrategy {
-            force("org.jetbrains:annotations:23.0.0")
-        }
-        exclude(group = "com.intellij", module = "annotations")
-    }
 }
 
 dependencies {
+    implementation(project(":feature:releases"))
+    implementation(project(":feature:search"))
+    implementation(project(":feature:favorites"))
+    implementation(project(":feature:details"))
+    implementation(project(":feature:settings"))
+    implementation(project(":core:basepresentation"))
+    implementation(project(":data:settings"))
 
-    implementation(project(":common:network"))
-    implementation(project(":common:database"))
-    implementation(project(":common:data:favorite"))
-    implementation(project(":common:data:settings"))
-    implementation(project(":common:data:releases"))
-    implementation(project(":common:data:search"))
-    implementation(project(":common:di"))
-
-    implementation(libs.androidx.benchmark.baseline.profile.gradle.plugin)
-    implementation(libs.androidx.appcompat)
     implementation (libs.bundles.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
 
-//    implementation(libs.dagger)
-//    kapt(libs.daggerCompiler)
     implementation(libs.hilt.core)
-//    implementation(libs.hilt.compiler)
     kapt(libs.hilt.compiler)
 
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation(libs.hilt.navigation.compose)
 
     // Coil
     implementation(libs.coil.compose)
@@ -91,21 +72,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
-
-    // Room
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    kapt(libs.androidx.room.compiler)
-
-    // Ktor
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.cio)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.ktor.client.logging)
-
-    // Serialization
-    implementation(libs.kotlinx.serialization.json)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines)

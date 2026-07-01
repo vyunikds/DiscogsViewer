@@ -1,0 +1,24 @@
+<!--
+  ~ Copyright (C) 2026 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="50dp"
+    android:height="50dp"
+    android:viewportWidth="50"
+    android:viewportHeight="50">
+  <path
+      android:fillColor="#FF000000"
+      android:pathData="M25,2C12.318,2 2,12.318 2,25C2,31.39 4.622,37.178 8.844,41.35L10.912,39.18C7.264,35.555 5,30.537 5,25C5,13.972 13.972,5 25,5C28.326,5 31.458,5.828 34.221,7.271L35.627,4.611C32.446,2.946 28.832,2 25,2zM25,7C15.075,7 7,15.075 7,25C7,29.968 9.023,34.472 12.289,37.732L14.359,35.559C11.667,32.847 10,29.115 10,25C10,16.729 16.729,10 25,10C27.483,10 29.823,10.616 31.887,11.689L33.287,9.037C30.804,7.742 27.989,7 25,7zM40.986,8.486L38.912,10.662C42.66,14.298 45,19.378 45,25C45,36.028 36.028,45 25,45C21.595,45 18.388,44.14 15.578,42.633L14.23,45.314C17.445,47.026 21.11,48 25,48C37.682,48 48,37.683 48,25C48,18.525 45.306,12.67 40.986,8.486zM25,12C17.832,12 12,17.832 12,25C12,28.546 13.43,31.762 15.74,34.109L19.885,29.764C18.719,28.513 18,26.84 18,25C18,21.14 21.14,18 25,18C26.134,18 27.203,18.277 28.152,18.758L30.953,13.455C29.167,12.53 27.146,12 25,12zM37.533,12.107L35.465,14.275C38.258,17.001 40,20.799 40,25C40,33.271 33.271,40 25,40C22.403,40 19.958,39.336 17.826,38.17L16.479,40.85C19.017,42.22 21.918,43 25,43C34.925,43 43,34.925 43,25C43,19.946 40.899,15.379 37.533,12.107zM34.088,15.721L29.951,20.057C31.216,21.324 32,23.072 32,25C32,28.859 28.86,32 25,32C23.694,32 22.475,31.635 21.428,31.01L18.727,36.379C20.589,37.409 22.726,38 25,38C32.168,38 38,32.168 38,25C38,21.367 36.499,18.082 34.088,15.721zM25,24A1,1 0,0 0,25 26A1,1 0,0 0,25 24z"/>
+</vector>
