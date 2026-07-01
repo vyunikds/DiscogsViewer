@@ -1,7 +1,8 @@
 # DiscogsViewer
 
 Приложение для просмотра музыкальных релизов через Discogs API.
-токен можно получить [здесь](https://www.discogs.com/settings/developers).
+
+Токен можно получить [здесь](https://www.discogs.com/settings/developers).
 
 ## Описание
 Выпускной проект по Android курсу от Otus.
