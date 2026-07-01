@@ -7,4 +7,5 @@ object Table {
     const val GENRES = "genres"
     const val COUNTRIES = "countries"
     const val FAVORITES = "favorites"
+    const val TOP_RELEASES = "top_releases"
 }

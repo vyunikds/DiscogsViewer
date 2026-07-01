@@ -8,16 +8,22 @@ import com.example.discogsviewer.favorites.domain.LoadFavoritesPageUseCase
 import com.example.favorite.FavoritesRepository
 import com.example.favorite.ToggleFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
     private val loadFavoritesPageUseCase: LoadFavoritesPageUseCase,
@@ -46,18 +52,32 @@ class FavoritesViewModel @Inject constructor(
     }
 
     init {
+        // Single subscription: update totalCount + reload list on count change
         favoritesRepository.consumeCount()
+            .distinctUntilChanged()
             .onEach { count ->
                 if (selectedGenre == null) {
                     _state.update { it.copy(totalCount = count) }
                 }
             }
+            .debounce { 300L }
+            .flatMapMerge {
+                flow {
+                    val st = _state.value
+                    if (!st.isLoading && !st.isLoadingMore) {
+                        emit("reload")
+                    }
+                }
+            }
+            .onEach { resetAndReload() }
             .launchIn(viewModelScope)
+
         favoritesRepository.consumeFavoriteGenres()
             .onEach { genres ->
                 _state.update { it.copy(availableGenres = genres) }
             }
             .launchIn(viewModelScope)
+
         loadPage(0)
     }
 
@@ -70,8 +90,13 @@ class FavoritesViewModel @Inject constructor(
 
     fun onRemoveFavorite(productId: String) {
         viewModelScope.launch {
+            val genre = selectedGenre
+            if (genre != null && favoritesRepository.getFilteredGenreCount(genre) <= 1) {
+                selectedGenre = null
+                _state.update { it.copy(selectedGenre = null) }
+            }
             toggleFavoriteUseCase(productId, 0L, false)
-            resetAndReload()
+            // No manual resetAndReload — the reactive flow will trigger it after debounce
         }
     }
 
@@ -97,6 +122,10 @@ class FavoritesViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
+                if (selectedGenre != null && favoritesRepository.getFilteredGenreCount(selectedGenre!!) == 0) {
+                    selectedGenre = null
+                    _state.update { it.copy(selectedGenre = null) }
+                }
                 val releasesWithFavorite = loadFavoritesPageUseCase(
                     currentSortMode,
                     pageSize,
