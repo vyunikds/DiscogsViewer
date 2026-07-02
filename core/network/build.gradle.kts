@@ -49,5 +49,18 @@ fun getPropertyValue(filename: String, propName: String): String {
     props.load(FileInputStream(propsFile))
     check(props[propName] != null)
 
-    return props.getProperty(propName)
+    val rawValue = props.getProperty(propName)
+
+    // Resolve from local.properties if value is a placeholder
+    val localProps = Properties()
+    val localPropsFile = rootProject.file("local.properties")
+    if (localPropsFile.exists()) {
+        localProps.load(FileInputStream(localPropsFile))
+        val resolved = localProps.getProperty(rawValue)
+        if (resolved != null && resolved.isNotEmpty()) {
+            return "\"$resolved\""
+        }
+    }
+
+    return "\"$rawValue\""
 }

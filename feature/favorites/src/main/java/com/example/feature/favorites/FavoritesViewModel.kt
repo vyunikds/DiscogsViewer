@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -56,6 +57,7 @@ class FavoritesViewModel @Inject constructor(
         // Single subscription: update totalCount + reload list on count change
         favoritesRepository.consumeCount()
             .distinctUntilChanged()
+            .drop(1)
             .onEach { count ->
                 if (selectedGenre == null) {
                     _state.update { it.copy(totalCount = count) }
