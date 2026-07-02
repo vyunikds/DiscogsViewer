@@ -9,7 +9,7 @@ build/
 .externalNativeBuild
 .cxx
 local.properties
-/common/network/network.properties
+core/network/network.properties
 gradle/gradle-daemon-jvm.properties
 .gigacode/
 .opencode/
