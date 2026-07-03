@@ -6,14 +6,13 @@ import com.example.database.dbo.ReleaseCountryDbo
 import com.example.database.dbo.ReleaseGenreDbo
 import com.example.network.dto.Community
 import com.example.network.dto.ReleaseResultDto
+import kotlin.test.assertEquals
 import kotlinx.serialization.InternalSerializationApi
 import org.junit.Before
 import org.junit.Test
-import kotlin.test.assertEquals
 
 @OptIn(InternalSerializationApi::class)
 class ReleaseDataMapperTest {
-
     private lateinit var mapper: ReleaseDataMapper
 
     @Before
@@ -23,13 +22,7 @@ class ReleaseDataMapperTest {
 
     @Test
     fun `toDbo maps all fields correctly`() {
-        val dto = createDto(
-            id = 12345,
-            title = "Artist - Title",
-            thumb = "https://example.com/thumb.jpg",
-            coverImage = "https://example.com/cover.jpg",
-            community = Community(want = 10, have = 5)
-        )
+        val dto = createDto(CreateDtoConfig(title = "Artist - Title", id = 12345))
 
         val result = mapper.toDbo(dto)
 
@@ -44,7 +37,7 @@ class ReleaseDataMapperTest {
 
     @Test
     fun `toDbo splits Artist - Title correctly`() {
-        val dto = createDto(title = "Artist - Title")
+        val dto = createDto(CreateDtoConfig(title = "Artist - Title"))
 
         val result = mapper.toDbo(dto)
 
@@ -54,7 +47,7 @@ class ReleaseDataMapperTest {
 
     @Test
     fun `toDbo handles multiple dashes`() {
-        val dto = createDto(title = "Artist - Title - Remix")
+        val dto = createDto(CreateDtoConfig(title = "Artist - Title - Remix"))
 
         val result = mapper.toDbo(dto)
 
@@ -64,7 +57,7 @@ class ReleaseDataMapperTest {
 
     @Test
     fun `toDbo handles title without dash`() {
-        val dto = createDto(title = "OnlyTitle")
+        val dto = createDto(CreateDtoConfig(title = "OnlyTitle"))
 
         val result = mapper.toDbo(dto)
 
@@ -74,7 +67,7 @@ class ReleaseDataMapperTest {
 
     @Test
     fun `toDbo handles leading dash`() {
-        val dto = createDto(title = "- Title")
+        val dto = createDto(CreateDtoConfig(title = "- Title"))
 
         val result = mapper.toDbo(dto)
 
@@ -84,7 +77,7 @@ class ReleaseDataMapperTest {
 
     @Test
     fun `toDbo handles trailing dash`() {
-        val dto = createDto(title = "Artist -")
+        val dto = createDto(CreateDtoConfig(title = "Artist -"))
 
         val result = mapper.toDbo(dto)
 
@@ -94,7 +87,7 @@ class ReleaseDataMapperTest {
 
     @Test
     fun `toDbo handles empty title`() {
-        val dto = createDto(title = "")
+        val dto = createDto(CreateDtoConfig(title = ""))
 
         val result = mapper.toDbo(dto)
 
@@ -104,7 +97,7 @@ class ReleaseDataMapperTest {
 
     @Test
     fun `toReleaseGenres with single genre`() {
-        val dto = createDto(genre = listOf("Rock"))
+        val dto = createDto(CreateDtoConfig(genre = listOf("Rock")))
 
         val result = mapper.toReleaseGenres(dto)
 
@@ -114,7 +107,7 @@ class ReleaseDataMapperTest {
 
     @Test
     fun `toReleaseGenres with multiple genres`() {
-        val dto = createDto(genre = listOf("Rock", "Pop", "Jazz"))
+        val dto = createDto(CreateDtoConfig(genre = listOf("Rock", "Pop", "Jazz")))
 
         val result = mapper.toReleaseGenres(dto)
 
@@ -129,7 +122,7 @@ class ReleaseDataMapperTest {
 
     @Test
     fun `toReleaseGenres with empty genre list`() {
-        val dto = createDto(genre = emptyList())
+        val dto = createDto(CreateDtoConfig(genre = emptyList()))
 
         val result = mapper.toReleaseGenres(dto)
 
@@ -138,7 +131,7 @@ class ReleaseDataMapperTest {
 
     @Test
     fun `toReleaseCountries returns single item with correct ID and country`() {
-        val dto = createDto(id = 99999, country = "US")
+        val dto = createDto(CreateDtoConfig(id = 99999, country = "US"))
 
         val result = mapper.toReleaseCountries(dto)
 
@@ -148,11 +141,12 @@ class ReleaseDataMapperTest {
 
     @Test
     fun `toDbos maps list of DTOs to list of DBOs`() {
-        val dtos = listOf(
-            createDto(id = 1, title = "A1 - T1"),
-            createDto(id = 2, title = "A2 - T2"),
-            createDto(id = 3, title = "A3 - T3")
-        )
+        val dtos =
+            listOf(
+                createDto(CreateDtoConfig(id = 1, title = "A1 - T1")),
+                createDto(CreateDtoConfig(id = 2, title = "A2 - T2")),
+                createDto(CreateDtoConfig(id = 3, title = "A3 - T3")),
+            )
 
         val result = mapper.toDbos(dtos)
 
@@ -170,10 +164,11 @@ class ReleaseDataMapperTest {
 
     @Test
     fun `toReleaseGenresBatch flatMaps multiple DTOs genres`() {
-        val dtos = listOf(
-            createDto(id = 1, genre = listOf("Rock", "Pop")),
-            createDto(id = 2, genre = listOf("Jazz"))
-        )
+        val dtos =
+            listOf(
+                createDto(CreateDtoConfig(id = 1, genre = listOf("Rock", "Pop"))),
+                createDto(CreateDtoConfig(id = 2, genre = listOf("Jazz"))),
+            )
 
         val result = mapper.toReleaseGenresBatch(dtos)
 
@@ -185,11 +180,12 @@ class ReleaseDataMapperTest {
 
     @Test
     fun `toReleaseCountriesBatch flatMaps multiple DTOs countries`() {
-        val dtos = listOf(
-            createDto(id = 1, country = "US"),
-            createDto(id = 2, country = "UK"),
-            createDto(id = 3, country = "DE")
-        )
+        val dtos =
+            listOf(
+                createDto(CreateDtoConfig(id = 1, country = "US")),
+                createDto(CreateDtoConfig(id = 2, country = "UK")),
+                createDto(CreateDtoConfig(id = 3, country = "DE")),
+            )
 
         val result = mapper.toReleaseCountriesBatch(dtos)
 
@@ -201,13 +197,14 @@ class ReleaseDataMapperTest {
 
     @Test
     fun `toGenres deduplicates by genre name`() {
-        val releaseGenres = listOf(
-            ReleaseGenreDbo("1", "Rock"),
-            ReleaseGenreDbo("2", "Rock"),
-            ReleaseGenreDbo("3", "Pop"),
-            ReleaseGenreDbo("4", "Jazz"),
-            ReleaseGenreDbo("5", "Pop")
-        )
+        val releaseGenres =
+            listOf(
+                ReleaseGenreDbo("1", "Rock"),
+                ReleaseGenreDbo("2", "Rock"),
+                ReleaseGenreDbo("3", "Pop"),
+                ReleaseGenreDbo("4", "Jazz"),
+                ReleaseGenreDbo("5", "Pop"),
+            )
 
         val result = mapper.toGenres(releaseGenres)
 
@@ -219,13 +216,14 @@ class ReleaseDataMapperTest {
 
     @Test
     fun `toCountries deduplicates by country name`() {
-        val releaseCountries = listOf(
-            ReleaseCountryDbo("1", "US"),
-            ReleaseCountryDbo("2", "US"),
-            ReleaseCountryDbo("3", "UK"),
-            ReleaseCountryDbo("4", "DE"),
-            ReleaseCountryDbo("5", "UK")
-        )
+        val releaseCountries =
+            listOf(
+                ReleaseCountryDbo("1", "US"),
+                ReleaseCountryDbo("2", "US"),
+                ReleaseCountryDbo("3", "UK"),
+                ReleaseCountryDbo("4", "DE"),
+                ReleaseCountryDbo("5", "UK"),
+            )
 
         val result = mapper.toCountries(releaseCountries)
 
@@ -235,23 +233,24 @@ class ReleaseDataMapperTest {
         assertEquals(CountryDbo("DE"), result[2])
     }
 
-    private fun createDto(
-        title: String = "Artist - Title",
-        country: String = "US",
-        id: Int = 12345,
-        genre: List<String> = listOf("Rock"),
-        thumb: String = "https://example.com/thumb.jpg",
-        coverImage: String = "https://example.com/cover.jpg",
-        community: Community = Community(want = 10, have = 5)
-    ): ReleaseResultDto {
-        return ReleaseResultDto(
-            title = title,
-            country = country,
-            id = id,
-            genre = genre,
-            thumb = thumb,
-            coverImage = coverImage,
-            community = community
+    private data class CreateDtoConfig(
+        val title: String = "Artist - Title",
+        val country: String = "US",
+        val id: Int = 12345,
+        val genre: List<String> = listOf("Rock"),
+        val thumb: String = "https://example.com/thumb.jpg",
+        val coverImage: String = "https://example.com/cover.jpg",
+        val community: Community = Community(want = 10, have = 5),
+    )
+
+    private fun createDto(config: CreateDtoConfig = CreateDtoConfig()): ReleaseResultDto =
+        ReleaseResultDto(
+            title = config.title,
+            country = config.country,
+            id = config.id,
+            genre = config.genre,
+            thumb = config.thumb,
+            coverImage = config.coverImage,
+            community = config.community,
         )
-    }
 }

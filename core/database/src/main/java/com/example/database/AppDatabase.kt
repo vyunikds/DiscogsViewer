@@ -27,9 +27,10 @@ import com.example.database.dbo.TopReleaseDbo
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
-
     abstract fun getReleaseDao(): ReleaseDao
+
     abstract fun getFavoritesDao(): FavoritesDao
+
     abstract fun getTopReleaseDao(): TopReleaseDao
 
     companion object

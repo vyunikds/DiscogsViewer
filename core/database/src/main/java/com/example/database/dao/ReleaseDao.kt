@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ReleaseDao {
-
     @Transaction
     @Query("SELECT * FROM releases ORDER BY community_have DESC")
     fun getAllReleases(): Flow<List<FullReleaseDbo>>

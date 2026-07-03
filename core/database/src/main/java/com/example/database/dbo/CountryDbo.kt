@@ -6,5 +6,5 @@ import com.example.database.Table
 
 @Entity(tableName = Table.COUNTRIES)
 data class CountryDbo(
-    @PrimaryKey val country: String
+    @PrimaryKey val country: String,
 )

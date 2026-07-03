@@ -17,25 +17,24 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.serialization.kotlinx.json.json
+import javax.inject.Singleton
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-
     @OptIn(ExperimentalSerializationApi::class)
     @Singleton
     @Provides
-    fun provideKtor(): HttpClient {
-        return HttpClient(CIO) {
+    fun provideKtor(): HttpClient =
+        HttpClient(CIO) {
             install(ContentNegotiation) {
                 json(
                     Json {
                         ignoreUnknownKeys = true
                         explicitNulls = false
-                    }
+                    },
                 )
             }
             install(HttpRequestRetry) {
@@ -46,23 +45,19 @@ object NetworkModule {
             install(WebSockets)
             install(Logging) {
                 level = LogLevel.ALL
-                logger = object : Logger {
-                    override fun log(message: String) {
-                        Log.d("KtorClient", message)
+                logger =
+                    object : Logger {
+                        override fun log(message: String) {
+                            Log.d("KtorClient", message)
+                        }
                     }
-                }
             }
 //            install(DefaultRequest) {
 //                header("Authorization", "Bearer $AUTH_TOKEN")
 //            }
         }
-    }
 
     @Singleton
     @Provides
-    fun provideReleasesApiService(
-        client: HttpClient
-    ): ReleasesApiService {
-        return ReleasesApiServiceImpl(client)
-    }
+    fun provideReleasesApiService(client: HttpClient): ReleasesApiService = ReleasesApiServiceImpl(client)
 }

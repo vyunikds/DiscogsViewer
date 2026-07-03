@@ -10,6 +10,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.feature.search.state.ReleaseSearchViewModel
 import com.example.feature.search.state.ReleasesSearchScreenState
 import com.example.feature.search.ui.SearchScreen
+import com.example.feature.search.ui.SearchScreenCallbacks
 
 @Composable
 fun SearchScreenRoute(
@@ -29,22 +30,25 @@ fun SearchScreenRoute(
     SearchScreen(
         state = state,
         listState = listState,
-        onSearchQueryChanged = viewModel::onSearchQueryChanged,
-        onSearchConfirmed = viewModel::confirmQuery,
-        onHistoryItemClicked = { query ->
-            viewModel.onSearchQueryChanged(query)
-            viewModel.confirmQuery(query)
-        },
-        onHistoryItemDeleted = viewModel::removeHistoryItem,
-        onItemClicked = { releaseId ->
-            if (state.searchQuery.isNotBlank()) {
-                viewModel.confirmQuery(state.searchQuery)
-            }
-            onItemClicked(releaseId)
-        },
-        onToggleFavorite = viewModel::onToggleFavorite,
-        onClearHistory = viewModel::clearHistory,
-        onErrorShown = viewModel::errorHasShown,
-        onLoadMore = viewModel::loadMore,
+        callbacks =
+            SearchScreenCallbacks(
+                onSearchQueryChanged = viewModel::onSearchQueryChanged,
+                onSearchConfirmed = viewModel::confirmQuery,
+                onHistoryItemClicked = { query ->
+                    viewModel.onSearchQueryChanged(query)
+                    viewModel.confirmQuery(query)
+                },
+                onHistoryItemDeleted = viewModel::removeHistoryItem,
+                onItemClicked = { releaseId ->
+                    if (state.searchQuery.isNotBlank()) {
+                        viewModel.confirmQuery(state.searchQuery)
+                    }
+                    onItemClicked(releaseId)
+                },
+                onToggleFavorite = viewModel::onToggleFavorite,
+                onClearHistory = viewModel::clearHistory,
+                onErrorShown = viewModel::errorHasShown,
+                onLoadMore = viewModel::loadMore,
+            ),
     )
 }

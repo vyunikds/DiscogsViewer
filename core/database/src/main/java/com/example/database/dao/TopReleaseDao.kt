@@ -26,7 +26,7 @@ interface TopReleaseDao {
         SELECT r.* FROM releases r
         INNER JOIN top_releases tr ON r.release_id = tr.releaseId
         ORDER BY r.community_have DESC
-        """
+        """,
     )
     fun getTopReleases(): Flow<List<FullReleaseDbo>>
 }

@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SearchResponse(
     val pagination: Pagination,
-    val results: List<ReleaseResultDto>
+    val results: List<ReleaseResultDto>,
 )
 
 @InternalSerializationApi
@@ -18,7 +18,7 @@ data class Pagination(
     val pages: Int,
     @SerialName("per_page") val perPage: Int,
     val items: Int,
-    val urls: PaginationUrls
+    val urls: PaginationUrls,
 )
 
 @InternalSerializationApi
@@ -44,5 +44,5 @@ data class ReleaseResultDto(
 @Serializable
 data class Community(
     val want: Int,
-    val have: Int
+    val have: Int,
 )

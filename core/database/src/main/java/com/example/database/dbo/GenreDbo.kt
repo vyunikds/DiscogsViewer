@@ -6,5 +6,5 @@ import com.example.database.Table
 
 @Entity(tableName = Table.GENRES)
 data class GenreDbo(
-    @PrimaryKey val genre: String
+    @PrimaryKey val genre: String,
 )

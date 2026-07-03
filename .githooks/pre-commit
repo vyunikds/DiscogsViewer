@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+# Данный скрипт запускает таску detekt (которая автоматически запускает ktlintFormat)
+# и блокирует коммит в случае ошибки выполнения.
+# Обработка файлов, изменённых ktlintFormat:
+#   1) Если файл до линта был modified (не staged) -> ошибка, т.к. не можем коммитить
+#   2) Если файл до линта не был modified -> делаем add и коммитим
+#   3) Untracked -> игнорируем
+
+if ! git diff --cached --name-only | grep -q '\.kt[s]*$'; then
+  exit 0
+fi
+
+# remember list of modified (not staged) files
+before_modified_files=$(git ls-files --modified)
+
+# remember time
+before_time=$(date +%s)
+
+# run Detekt (ktlintFormat runs automatically as a dependency)
+echo "▶ Running ktlintFormat + detekt..."
+
+OUTPUT="/tmp/detekt-$(date +%s)"
+./gradlew detekt > "$OUTPUT" 2>&1
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ]; then
+  cat "$OUTPUT"
+  rm -f "$OUTPUT"
+  echo "***********************************************"
+  echo "           ktlint/detekt failed               "
+  echo "  Please fix the issues before committing     "
+  echo "***********************************************"
+  exit $EXIT_CODE
+fi
+
+rm -f "$OUTPUT"
+
+# handle files that were modified by ktlintFormat
+after_modified_files=$(git ls-files --modified)
+
+for file in $after_modified_files; do
+  after_time=$(date -r "$file" +%s 2>/dev/null)
+  if [ $? -ne 0 ]; then
+    continue
+  fi
+
+  if [ "$after_time" -gt "$before_time" ]; then
+    if echo "$before_modified_files" | grep -qw "$file"; then
+      echo "**************************************************************"
+      echo "                  ktlintFormat failed                         "
+      echo "  ktlintFormat automatically changed file you were editing:   "
+      echo "  $file"
+      echo "  Please add it to the commit manually and repeat the commit  "
+      echo "**************************************************************"
+      exit 1
+    else
+      git add "$file"
+      echo "✓ $file was auto-formatted and staged by ktlintFormat"
+    fi
+  fi
+done
+
+echo "✓ ktlint/detekt passed."
+exit 0

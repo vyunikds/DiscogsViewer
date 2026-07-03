@@ -13,5 +13,5 @@ data class ReleaseDbo(
     val thumb: String,
     @ColumnInfo(name = "cover_image") val coverImage: String,
     @ColumnInfo(name = "community_have") val communityHave: Int = 0,
-    @ColumnInfo(name = "community_want") val communityWant: Int = 0
+    @ColumnInfo(name = "community_want") val communityWant: Int = 0,
 )

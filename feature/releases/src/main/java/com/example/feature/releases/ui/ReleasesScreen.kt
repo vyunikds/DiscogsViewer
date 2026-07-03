@@ -25,18 +25,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.feature.releases.R
-import com.example.feature.releases.state.ReleasesScreenState
 import com.example.feature.releases.state.ReleaseState
+import com.example.feature.releases.state.ReleasesScreenState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReleasesScreen(
     modifier: Modifier = Modifier,
     state: ReleasesScreenState,
-    onRefresh: () -> Unit,
-    onItemClicked: (String) -> Unit,
-    onToggleFavorite: (String, Boolean) -> Unit,
-    onErrorShown: () -> Unit,
+    callbacks: ReleasesScreenCallbacks,
     listState: LazyListState = rememberLazyListState(),
 ) {
     val context = LocalContext.current
@@ -44,17 +41,18 @@ fun ReleasesScreen(
     if (state.hasError) {
         LaunchedEffect(state.hasError) {
             Toast.makeText(context, state.errorProvider(context), Toast.LENGTH_SHORT).show()
-            onErrorShown()
+            callbacks.onErrorShown()
         }
     }
     PullToRefreshBox(
         isRefreshing = state.isLoading,
-        onRefresh = onRefresh,
-        modifier = modifier
-            .fillMaxSize()
+        onRefresh = callbacks.onRefresh,
+        modifier =
+            modifier
+                .fillMaxSize(),
     ) {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -63,20 +61,20 @@ fun ReleasesScreen(
                 items(state.releasesListState, key = { it.id }) { release ->
                     ReleaseLargeCard(
                         release = release.toReleaseCardState(),
-                        onToggleFavorite = onToggleFavorite,
-                        onItemClicked = onItemClicked,
+                        onToggleFavorite = callbacks.onToggleFavorite,
+                        onItemClicked = callbacks.onItemClicked,
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         thickness = 1.dp,
-                        color = Color.LightGray.copy(alpha = 0.5f)
+                        color = Color.LightGray.copy(alpha = 0.5f),
                     )
                 }
             }
 
             if ((!state.isInitialized || state.isLoading) && state.releasesListState.isEmpty()) {
                 CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier.align(Alignment.Center),
                 )
             }
 
@@ -86,34 +84,51 @@ fun ReleasesScreen(
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier.align(Alignment.Center),
                 )
             }
         }
     }
 }
 
+data class ReleasesScreenCallbacks(
+    val onRefresh: () -> Unit,
+    val onItemClicked: (String) -> Unit,
+    val onToggleFavorite: (String, Boolean) -> Unit,
+    val onErrorShown: () -> Unit,
+)
+
 @Preview(showBackground = true)
 @Composable
 private fun ReleasesScreenWithDataPreview() {
     ReleasesScreen(
-        state = ReleasesScreenState(
-            releasesListState = listOf(
-                ReleaseState(
-                    id = "0",
-                    artistTitle = "Artist Title",
-                    releaseTitle = "Release Title",
-                    country = "UK",
-                    thumb = "https://i.discogs.com/5m6_bBtu4gBfLQSmEr80zoVNXvZGFB8Ld3ajU7_Vkoo/rs:fit/g:sm/q:40/h:150/w:150/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTE1OTk3/NjMyLTE2MDE2MTA1/NTYtMzQwNC5qcGVn.jpeg",
-                    isFavorite = true,
-                    genre = listOf("Rock"),
-                )
+        state =
+            ReleasesScreenState(
+                releasesListState =
+                    listOf(
+                        ReleaseState(
+                            id = "0",
+                            artistTitle = "Artist Title",
+                            releaseTitle = "Release Title",
+                            country = "UK",
+                            thumb =
+                                "https://i.discogs.com/5m6_bBtu4gBfLQSmEr80zoVNXvZG" +
+                                    "FB8Ld3ajU7_Vkoo/rs:fit/g:sm/q:40/h:150/w:150/" +
+                                    "czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt" +
+                                    "/YWdlcy9SLTE1OTk3/NjMyLTE2MDE2MTA1" +
+                                    "/NTYtMzQwNC5qcGVn.jpeg",
+                            isFavorite = true,
+                            genre = listOf("Rock"),
+                        ),
+                    ),
+                isLoading = false,
             ),
-            isLoading = false
-        ),
-        onRefresh = {},
-        onItemClicked = {},
-        onErrorShown = {},
-        onToggleFavorite = { _, _ -> },
+        callbacks =
+            ReleasesScreenCallbacks(
+                onRefresh = {},
+                onItemClicked = {},
+                onToggleFavorite = { _, _ -> },
+                onErrorShown = {},
+            ),
     )
 }

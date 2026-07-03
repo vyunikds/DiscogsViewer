@@ -41,11 +41,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.core.basepresentation.R
 
-enum class ReleaseSmallCardMode {
-    FAVORITES,
-    TOGGLE_FAVORITE,
-}
-
+@Suppress("LongParameterList", "LongMethod")
 @Composable
 fun ReleaseSmallCard(
     modifier: Modifier = Modifier,
@@ -56,31 +52,35 @@ fun ReleaseSmallCard(
     onItemClicked: (String) -> Unit,
 ) {
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(90.dp)
-            .clickable { onItemClicked(release.id) },
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(90.dp)
+                .clickable { onItemClicked(release.id) },
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             AsyncImage(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                modifier =
+                    Modifier
+                        .size(72.dp)
+                        .clip(RoundedCornerShape(8.dp)),
                 model = release.thumb.ifBlank { release.coverImage.ifBlank { null } },
                 contentDescription = null,
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
             )
 
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(horizontal = 4.dp),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .padding(horizontal = 4.dp),
             ) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
@@ -89,7 +89,7 @@ fun ReleaseSmallCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.secondary
+                    color = MaterialTheme.colorScheme.secondary,
                 )
 
                 Text(
@@ -99,28 +99,29 @@ fun ReleaseSmallCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
                 )
 
                 if (mode != ReleaseSmallCardMode.FAVORITES) {
                     Row(
-                        modifier = Modifier
-                            .horizontalScroll(rememberScrollState())
-                            .height(IntrinsicSize.Min),
+                        modifier =
+                            Modifier
+                                .horizontalScroll(rememberScrollState())
+                                .height(IntrinsicSize.Min),
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         release.genre.forEach { genre ->
                             Text(
                                 text = genre,
-                                modifier = Modifier
-                                    .background(
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        shape = RoundedCornerShape(8.dp)
-                                    )
-                                    .padding(horizontal = 6.dp, vertical = 4.dp),
+                                modifier =
+                                    Modifier
+                                        .background(
+                                            color = MaterialTheme.colorScheme.secondary,
+                                            shape = RoundedCornerShape(8.dp),
+                                        ).padding(horizontal = 6.dp, vertical = 4.dp),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSecondary
+                                color = MaterialTheme.colorScheme.onSecondary,
                             )
                         }
                     }
@@ -132,13 +133,13 @@ fun ReleaseSmallCard(
                     if (onRemoveFavorite != null) {
                         IconButton(
                             modifier = Modifier.align(Alignment.CenterVertically),
-                            onClick = { onRemoveFavorite(release.id) }
+                            onClick = { onRemoveFavorite(release.id) },
                         ) {
                             Icon(
                                 modifier = Modifier.size(32.dp),
                                 imageVector = Icons.Default.Favorite,
                                 contentDescription = stringResource(R.string.remove_favorite_desc),
-                                tint = FavoriteRed
+                                tint = FavoriteRed,
                             )
                         }
                     }
@@ -148,7 +149,7 @@ fun ReleaseSmallCard(
                     if (onToggleFavorite != null) {
                         IconButton(
                             modifier = Modifier.align(Alignment.CenterVertically),
-                            onClick = { onToggleFavorite(release.id, !release.isFavorite) }
+                            onClick = { onToggleFavorite(release.id, !release.isFavorite) },
                         ) {
                             AnimatedContent(
                                 targetState = release.isFavorite,
@@ -156,13 +157,18 @@ fun ReleaseSmallCard(
                                     (fadeIn() + scaleIn(initialScale = 0.2f))
                                         .togetherWith(fadeOut() + scaleOut(targetScale = 0.2f))
                                 },
-                                label = "favorite_icon_animation"
+                                label = "favorite_icon_animation",
                             ) { isFavorite ->
                                 Icon(
                                     modifier = Modifier.size(32.dp),
-                                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                    imageVector =
+                                        if (isFavorite) {
+                                            Icons.Default.Favorite
+                                        } else {
+                                            Icons.Default.FavoriteBorder
+                                        },
                                     contentDescription = stringResource(R.string.add_favorite_desc),
-                                    tint = if (isFavorite) FavoriteRed else MaterialTheme.colorScheme.onSurface
+                                    tint = if (isFavorite) FavoriteRed else MaterialTheme.colorScheme.onSurface,
                                 )
                             }
                         }

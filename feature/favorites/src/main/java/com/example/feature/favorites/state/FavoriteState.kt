@@ -31,14 +31,15 @@ data class FavoriteReleasesState(
     val coverImage: String = "",
     val isFavorite: Boolean,
 ) {
-    fun toReleaseCardState(): ReleaseCardState = ReleaseCardState(
-        id = id,
-        artistTitle = artistTitle,
-        releaseTitle = releaseTitle,
-        country = country,
-        genre = genre,
-        thumb = thumb,
-        coverImage = coverImage,
-        isFavorite = isFavorite,
-    )
+    fun toReleaseCardState(): ReleaseCardState =
+        ReleaseCardState(
+            id = id,
+            artistTitle = artistTitle,
+            releaseTitle = releaseTitle,
+            country = country,
+            genre = genre,
+            thumb = thumb,
+            coverImage = coverImage,
+            isFavorite = isFavorite,
+        )
 }

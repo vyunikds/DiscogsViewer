@@ -52,15 +52,7 @@ import com.example.feature.search.state.ReleasesSearchScreenState
 fun SearchScreen(
     modifier: Modifier = Modifier,
     state: ReleasesSearchScreenState,
-    onSearchQueryChanged: (String) -> Unit,
-    onSearchConfirmed: (String) -> Unit,
-    onHistoryItemClicked: (String) -> Unit,
-    onHistoryItemDeleted: (String) -> Unit,
-    onItemClicked: (String) -> Unit,
-    onToggleFavorite: (String, Boolean) -> Unit,
-    onClearHistory: () -> Unit,
-    onErrorShown: () -> Unit,
-    onLoadMore: () -> Unit,
+    callbacks: SearchScreenCallbacks,
     listState: LazyListState = rememberLazyListState(),
 ) {
     val context = LocalContext.current
@@ -68,7 +60,7 @@ fun SearchScreen(
     if (state.hasError) {
         LaunchedEffect(state.hasError) {
             Toast.makeText(context, state.errorProvider(context), Toast.LENGTH_SHORT).show()
-            onErrorShown()
+            callbacks.onErrorShown()
         }
     }
 
@@ -85,13 +77,13 @@ fun SearchScreen(
     if (state.releasesSearchListState.isNotEmpty()) {
         LaunchedEffect(listState, state.hasNextPage, state.isLoadingMore) {
             snapshotFlow {
-                val visibleItems = listState.layoutInfo.visibleItemsInfo
-                val totalCount = listState.layoutInfo.totalItemsCount
-                val lastVisible = visibleItems.lastOrNull()?.index ?: 0
-                lastVisible >= totalCount - 3 && state.hasNextPage && !state.isLoadingMore
+                val visible = listState.layoutInfo.visibleItemsInfo
+                val total = listState.layoutInfo.totalItemsCount
+                val last = visible.lastOrNull()?.index ?: 0
+                last >= total - 3 && state.hasNextPage && !state.isLoadingMore
             }.collect { shouldLoadMore ->
                 if (shouldLoadMore) {
-                    onLoadMore()
+                    callbacks.onLoadMore()
                 }
             }
         }
@@ -99,147 +91,159 @@ fun SearchScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            SearchBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                colors = SearchBarDefaults.colors(
-                    dividerColor = Color.Transparent
-                ),
-                tonalElevation = 0.dp,
-                inputField = {
-                    TextField(
-                        value = searchText,
-                        onValueChange = {
-                            searchText = it
-                            onSearchQueryChanged(it)
-                        },
-                        placeholder = { Text(stringResource(R.string.search_placeholder)) },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                        trailingIcon = {
-                            if (searchText.isNotEmpty()) {
-                                IconButton(onClick = {
-                                    searchText = ""
-                                    onSearchQueryChanged("")
-                                }) {
-                                    Icon(
-                                        Icons.Default.Close,
-                                        contentDescription = stringResource(R.string.clear)
-                                    )
-                                }
-                            }
-                        },
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                focusManager.clearFocus()
-                                keyboardController?.hide()
-                                onSearchConfirmed(searchText)
-                            },
-                        ),
-                        singleLine = true,
-                        shape = RoundedCornerShape(20.dp),
-                        colors = androidx.compose.material3.TextFieldDefaults.colors(
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                        ),
-                    )
+            SearchField(
+                searchText = searchText,
+                onTextChange = {
+                    searchText = it
+                    callbacks.onSearchQueryChanged(it)
                 },
-                expanded = false,
-                onExpandedChange = {},
-            ) {
-            }
-            val showHistory = state.searchQuery.isBlank() && state.releasesSearchListState.isEmpty()
+                onClear = {
+                    searchText = ""
+                    callbacks.onSearchQueryChanged("")
+                },
+                onDone = {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                    callbacks.onSearchConfirmed(searchText)
+                },
+            )
+            SearchContentArea(state, callbacks, listState)
+        }
+    }
+}
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 12.dp)
-            ) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    state = listState,
-                ) {
-                    if (showHistory && state.searchHistory.isNotEmpty()) {
-                        items(
-                            items = state.searchHistory,
-                            key = { it },
-                        ) { query ->
-                            SearchHistoryItem(
-                                query = query,
-                                onClick = { onHistoryItemClicked(query) },
-                                onDelete = { onHistoryItemDeleted(query) },
-                            )
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                thickness = 1.dp,
-                                color = Color.LightGray.copy(alpha = 0.5f)
-                            )
-                        }
-                        item {
-                            Text(
-                                text = stringResource(R.string.clear_all_history),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable(onClick = onClearHistory)
-                                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                                color = Color.Gray,
-                            )
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                thickness = 1.dp,
-                                color = Color.LightGray.copy(alpha = 0.5f)
-                            )
-                        }
-                    }
-
-                    items(
-                        items = state.releasesSearchListState,
-                        key = { it.id },
-                    ) { release ->
-                        ReleaseSmallCard(
-                            release = release.toReleaseCardState(),
-                            mode = ReleaseSmallCardMode.TOGGLE_FAVORITE,
-                            onToggleFavorite = onToggleFavorite,
-                            onItemClicked = onItemClicked,
-                        )
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            thickness = 1.dp,
-                            color = Color.LightGray.copy(alpha = 0.5f)
-                        )
-                    }
-                    if (state.isLoadingMore) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
-                    }
-                }
-
-                if (state.isLoading && state.releasesSearchListState.isEmpty()) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
+@Suppress("LongMethod")
+@Composable
+private fun SearchContentArea(
+    state: ReleasesSearchScreenState,
+    callbacks: SearchScreenCallbacks,
+    listState: LazyListState,
+) {
+    val showHistory = state.searchQuery.isBlank() && state.releasesSearchListState.isEmpty()
+    Box(modifier = Modifier.fillMaxSize().padding(top = 12.dp)) {
+        LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
+            if (showHistory && state.searchHistory.isNotEmpty()) {
+                items(items = state.searchHistory, key = { it }) { query ->
+                    SearchHistoryItem(
+                        query = query,
+                        onClick = { callbacks.onHistoryItemClicked(query) },
+                        onDelete = { callbacks.onHistoryItemDeleted(query) },
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        thickness = 1.dp,
+                        color = Color.LightGray.copy(alpha = 0.5f),
                     )
                 }
-
-                if (showHistory && state.searchHistory.isEmpty()) {
+                item {
                     Text(
-                        text = stringResource(R.string.empty_search_history),
-                        modifier = Modifier.align(Alignment.Center),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = stringResource(R.string.clear_all_history),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable(onClick = callbacks.onClearHistory)
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                        color = Color.Gray,
                     )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        thickness = 1.dp,
+                        color = Color.LightGray.copy(alpha = 0.5f),
+                    )
+                }
+            }
+            items(items = state.releasesSearchListState, key = { it.id }) { release ->
+                ReleaseSmallCard(
+                    release = release.toReleaseCardState(),
+                    mode = ReleaseSmallCardMode.TOGGLE_FAVORITE,
+                    onToggleFavorite = callbacks.onToggleFavorite,
+                    onItemClicked = callbacks.onItemClicked,
+                )
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    thickness = 1.dp,
+                    color = Color.LightGray.copy(alpha = 0.5f),
+                )
+            }
+            if (state.isLoadingMore) {
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxSize().padding(16.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
             }
         }
+        if (state.isLoading && state.releasesSearchListState.isEmpty()) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+        if (showHistory && state.searchHistory.isEmpty()) {
+            Text(
+                text = stringResource(R.string.empty_search_history),
+                modifier = Modifier.align(Alignment.Center),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
+}
+
+data class SearchScreenCallbacks(
+    val onSearchQueryChanged: (String) -> Unit,
+    val onSearchConfirmed: (String) -> Unit,
+    val onHistoryItemClicked: (String) -> Unit,
+    val onHistoryItemDeleted: (String) -> Unit,
+    val onItemClicked: (String) -> Unit,
+    val onToggleFavorite: (String, Boolean) -> Unit,
+    val onClearHistory: () -> Unit,
+    val onErrorShown: () -> Unit,
+    val onLoadMore: () -> Unit,
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SearchField(
+    searchText: String,
+    onTextChange: (String) -> Unit,
+    onClear: () -> Unit,
+    onDone: () -> Unit,
+) {
+    SearchBar(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        colors = SearchBarDefaults.colors(dividerColor = Color.Transparent),
+        tonalElevation = 0.dp,
+        inputField = {
+            TextField(
+                value = searchText,
+                onValueChange = onTextChange,
+                placeholder = { Text(stringResource(R.string.search_placeholder)) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                trailingIcon = {
+                    if (searchText.isNotEmpty()) {
+                        IconButton(onClick = onClear) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = stringResource(R.string.clear),
+                            )
+                        }
+                    }
+                },
+                keyboardActions = KeyboardActions(onDone = { onDone() }),
+                singleLine = true,
+                shape = RoundedCornerShape(20.dp),
+                colors =
+                    androidx.compose.material3.TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                    ),
+            )
+        },
+        expanded = false,
+        onExpandedChange = {},
+    ) {}
 }
 
 @Preview(showBackground = true)
@@ -247,24 +251,28 @@ fun SearchScreen(
 private fun SearchScreenPreview() {
     MaterialTheme {
         SearchScreen(
-            state = ReleasesSearchScreenState(
-                searchQuery = "",
-                releasesSearchListState = emptyList(),
-                searchHistory = listOf("Pink Floyd", "Metallica", "Daft Punk"),
-                isLoading = false,
-                hasError = false,
-                isLoadingMore = false,
-                hasNextPage = true,
-            ),
-            onSearchQueryChanged = {},
-            onSearchConfirmed = {},
-            onHistoryItemClicked = {},
-            onHistoryItemDeleted = {},
-            onItemClicked = {},
-            onToggleFavorite = { _, _ -> },
-            onClearHistory = {},
-            onErrorShown = {},
-            onLoadMore = {},
+            state =
+                ReleasesSearchScreenState(
+                    searchQuery = "",
+                    releasesSearchListState = emptyList(),
+                    searchHistory = listOf("Pink Floyd", "Metallica", "Daft Punk"),
+                    isLoading = false,
+                    hasError = false,
+                    isLoadingMore = false,
+                    hasNextPage = true,
+                ),
+            callbacks =
+                SearchScreenCallbacks(
+                    onSearchQueryChanged = {},
+                    onSearchConfirmed = {},
+                    onHistoryItemClicked = {},
+                    onHistoryItemDeleted = {},
+                    onItemClicked = {},
+                    onToggleFavorite = { _, _ -> },
+                    onClearHistory = {},
+                    onErrorShown = {},
+                    onLoadMore = {},
+                ),
         )
     }
 }
@@ -274,24 +282,28 @@ private fun SearchScreenPreview() {
 private fun SearchScreenEmptyHistoryPreview() {
     MaterialTheme {
         SearchScreen(
-            state = ReleasesSearchScreenState(
-                searchQuery = "",
-                releasesSearchListState = emptyList(),
-                searchHistory = emptyList(),
-                isLoading = false,
-                hasError = false,
-                isLoadingMore = false,
-                hasNextPage = true,
-            ),
-            onSearchQueryChanged = {},
-            onSearchConfirmed = {},
-            onHistoryItemClicked = {},
-            onHistoryItemDeleted = {},
-            onItemClicked = {},
-            onToggleFavorite = { _, _ -> },
-            onClearHistory = {},
-            onErrorShown = {},
-            onLoadMore = {},
+            state =
+                ReleasesSearchScreenState(
+                    searchQuery = "",
+                    releasesSearchListState = emptyList(),
+                    searchHistory = emptyList(),
+                    isLoading = false,
+                    hasError = false,
+                    isLoadingMore = false,
+                    hasNextPage = true,
+                ),
+            callbacks =
+                SearchScreenCallbacks(
+                    onSearchQueryChanged = {},
+                    onSearchConfirmed = {},
+                    onHistoryItemClicked = {},
+                    onHistoryItemDeleted = {},
+                    onItemClicked = {},
+                    onToggleFavorite = { _, _ -> },
+                    onClearHistory = {},
+                    onErrorShown = {},
+                    onLoadMore = {},
+                ),
         )
     }
 }

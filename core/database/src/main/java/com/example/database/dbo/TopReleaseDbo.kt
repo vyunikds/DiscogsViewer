@@ -7,5 +7,5 @@ import com.example.database.Table
 
 @Entity(tableName = Table.TOP_RELEASES)
 data class TopReleaseDbo(
-    @PrimaryKey @ColumnInfo(name = "releaseId") val releaseId: String
+    @PrimaryKey @ColumnInfo(name = "releaseId") val releaseId: String,
 )

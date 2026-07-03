@@ -9,5 +9,5 @@ import com.example.database.Table
 data class FavoriteDbo(
     @PrimaryKey
     val releaseId: String,
-    @ColumnInfo(name = "added_at") val addedAt: Long
+    @ColumnInfo(name = "added_at") val addedAt: Long,
 )

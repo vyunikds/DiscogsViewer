@@ -14,17 +14,17 @@ import com.example.database.Table
             entity = ReleaseDbo::class,
             parentColumns = ["release_id"],
             childColumns = ["release_id"],
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.CASCADE,
         ),
         ForeignKey(
             entity = GenreDbo::class,
             parentColumns = ["genre"],
-            childColumns = ["genre"]
-        )
+            childColumns = ["genre"],
+        ),
     ],
-    indices = [Index("genre")]
+    indices = [Index("genre")],
 )
 data class ReleaseGenreDbo(
     @ColumnInfo(name = "release_id") val releaseId: String,
-    @ColumnInfo(name = "genre") val genre: String
+    @ColumnInfo(name = "genre") val genre: String,
 )

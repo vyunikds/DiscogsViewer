@@ -19,7 +19,10 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -34,196 +37,235 @@ import com.example.feature.releases.navigation.ReleasesScreenRoute
 import com.example.feature.search.navigation.SearchScreenRoute
 import com.example.feature.settings.navigation.SettingsScreenRoute
 
-@Composable
-fun MainNavigation() {
-    val navController = rememberNavController()
-    val screens = listOf(
+private val bottomScreens =
+    listOf(
         ScreenRoute.TopReleases,
         ScreenRoute.Search,
         ScreenRoute.Favorites,
     )
-    val bottomNavRoutes = screens.map { it.route }
+
+@Suppress("FunctionNaming")
+@Composable
+fun MainNavigation() {
+    val navController = rememberNavController()
     val scrollCallbacks = remember { mutableStateMapOf<String, () -> Unit>() }
     val savedListStates = remember { mutableStateMapOf<String, LazyListState>() }
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
-
-                screens.forEach { screen ->
-                    NavigationBarItem(
-                        icon = {
-                            Icon(
-                                screen.icon,
-                                contentDescription = stringResource(screen.titleRes),
-                            )
-                        },
-                        label = { Text(stringResource(screen.titleRes)) },
-                        selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
-                        onClick = {
-                            val currentRoute = currentDestination?.route ?: return@NavigationBarItem
-                            val previousRoute =
-                                navController.previousBackStackEntry?.destination?.route
-
-                            if (currentRoute == screen.route) {
-                                scrollCallbacks[currentRoute]?.invoke()
-                                return@NavigationBarItem
-                            }
-
-                            val isCurrentRouteBottomNav = bottomNavRoutes.contains(currentRoute)
-
-                            if (!isCurrentRouteBottomNav) {
-                                if (previousRoute == screen.route) {
-                                    navController.popBackStack()
-                                } else {
-                                    navController.navigate(screen.route) {
-                                        popUpTo(currentRoute) { inclusive = true }
-                                        launchSingleTop = true
-                                    }
-                                }
-                                return@NavigationBarItem
-                            }
-
-                            navController.navigate(screen.route) {
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                    )
-                }
-            }
-        }
+            BottomNavigationBar(
+                navController = navController,
+                scrollCallbacks = scrollCallbacks,
+            )
+        },
     ) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = ScreenRoute.TopReleases.route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
         ) {
-            composable(
-                route = ScreenRoute.TopReleases.route,
-                enterTransition = { fadeIn(animationSpec = tween(300)) },
-                exitTransition = { fadeOut(animationSpec = tween(300)) },
-                popEnterTransition = { fadeIn(animationSpec = tween(300)) },
-                popExitTransition = { fadeOut(animationSpec = tween(300)) },
-            ) {
-                val listState = savedListStates.getOrPut(ScreenRoute.TopReleases.route) {
-                    rememberLazyListState()
-                }
+            setupRoutes(
+                navController = navController,
+                scrollCallbacks = scrollCallbacks,
+                savedListStates = savedListStates,
+            )
+        }
+    }
+}
 
-                ReleasesScreenRoute(
-                    listState = listState,
-                    onItemClicked = { releaseId ->
-                        navController.navigate(ScreenRouter.detailsRoute(releaseId))
-                    },
-                    onScrollToTopProvider = { callback ->
-                        scrollCallbacks[ScreenRoute.TopReleases.route] = callback
-                    }
-                )
-            }
-            composable(
-                route = ScreenRoute.Details.route,
-                arguments = listOf(navArgument("releaseId") {
-                    type = NavType.StringType
-                }),
-                enterTransition = {
-                    slideInHorizontally(animationSpec = tween(300)) { it } + fadeIn(
-                        animationSpec = tween(
-                            300
-                        )
+private fun NavGraphBuilder.setupRoutes(
+    navController: NavHostController,
+    scrollCallbacks: MutableMap<String, () -> Unit>,
+    savedListStates: MutableMap<String, LazyListState>,
+) {
+    setupTopReleases(navController, scrollCallbacks, savedListStates)
+    setupDetails(navController)
+    setupSearch(navController, scrollCallbacks, savedListStates)
+    setupFavorites(navController, scrollCallbacks, savedListStates)
+    setupSettings(navController)
+}
+
+private fun NavGraphBuilder.setupTopReleases(
+    navController: NavHostController,
+    scrollCallbacks: MutableMap<String, () -> Unit>,
+    savedListStates: MutableMap<String, LazyListState>,
+) {
+    composable(
+        route = ScreenRoute.TopReleases.route,
+        enterTransition = { fadeIn(animationSpec = tween(300)) },
+        exitTransition = { fadeOut(animationSpec = tween(300)) },
+        popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+        popExitTransition = { fadeOut(animationSpec = tween(300)) },
+    ) {
+        val listState =
+            savedListStates.getOrPut(ScreenRoute.TopReleases.route) { rememberLazyListState() }
+        ReleasesScreenRoute(
+            listState = listState,
+            onItemClicked = { releaseId ->
+                navController.navigate(ScreenRouter.detailsRoute(releaseId))
+            },
+            onScrollToTopProvider = { callback ->
+                scrollCallbacks[ScreenRoute.TopReleases.route] = callback
+            },
+        )
+    }
+}
+
+private fun NavGraphBuilder.setupDetails(navController: NavHostController) {
+    composable(
+        route = ScreenRoute.Details.route,
+        arguments = listOf(navArgument("releaseId") { type = NavType.StringType }),
+        enterTransition = {
+            slideInHorizontally(animationSpec = tween(300)) { it } +
+                fadeIn(animationSpec = tween(300))
+        },
+        exitTransition = { slideOutHorizontally(animationSpec = tween(300)) { -it } },
+        popEnterTransition = { slideInHorizontally(animationSpec = tween(300)) { -it } },
+        popExitTransition = {
+            slideOutHorizontally(animationSpec = tween(300)) { it } +
+                fadeOut(animationSpec = tween(300))
+        },
+    ) {
+        DetailsScreenRoute(onBack = { navController.popBackStack() })
+    }
+}
+
+private fun NavGraphBuilder.setupSearch(
+    navController: NavHostController,
+    scrollCallbacks: MutableMap<String, () -> Unit>,
+    savedListStates: MutableMap<String, LazyListState>,
+) {
+    composable(
+        route = ScreenRoute.Search.route,
+        enterTransition = { fadeIn(animationSpec = tween(300)) },
+        exitTransition = { fadeOut(animationSpec = tween(300)) },
+        popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+        popExitTransition = { fadeOut(animationSpec = tween(300)) },
+    ) {
+        val listState =
+            savedListStates.getOrPut(ScreenRoute.Search.route) { rememberLazyListState() }
+        SearchScreenRoute(
+            listState = listState,
+            onItemClicked = { releaseId ->
+                navController.navigate(ScreenRouter.detailsRoute(releaseId))
+            },
+            onScrollToTopProvider = { callback ->
+                scrollCallbacks[ScreenRoute.Search.route] = callback
+            },
+        )
+    }
+}
+
+private fun NavGraphBuilder.setupFavorites(
+    navController: NavHostController,
+    scrollCallbacks: MutableMap<String, () -> Unit>,
+    savedListStates: MutableMap<String, LazyListState>,
+) {
+    composable(
+        route = ScreenRoute.Favorites.route,
+        enterTransition = { fadeIn(animationSpec = tween(300)) },
+        exitTransition = { fadeOut(animationSpec = tween(300)) },
+        popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+        popExitTransition = { fadeOut(animationSpec = tween(300)) },
+    ) {
+        val listState =
+            savedListStates.getOrPut(ScreenRoute.Favorites.route) { rememberLazyListState() }
+        FavoritesScreenRoute(
+            listState = listState,
+            onItemClicked = { releaseId ->
+                navController.navigate(ScreenRouter.detailsRoute(releaseId))
+            },
+            onSettingsClicked = { navController.navigate(ScreenRoute.Settings.route) },
+            onScrollToTopProvider = { callback ->
+                scrollCallbacks[ScreenRoute.Favorites.route] = callback
+            },
+        )
+    }
+}
+
+private fun NavGraphBuilder.setupSettings(navController: NavHostController) {
+    composable(
+        route = ScreenRoute.Settings.route,
+        enterTransition = {
+            slideInHorizontally(animationSpec = tween(300)) { it } +
+                fadeIn(animationSpec = tween(300))
+        },
+        exitTransition = { slideOutHorizontally(animationSpec = tween(300)) { -it } },
+        popEnterTransition = { slideInHorizontally(animationSpec = tween(300)) { -it } },
+        popExitTransition = {
+            slideOutHorizontally(animationSpec = tween(300)) { it } +
+                fadeOut(animationSpec = tween(300))
+        },
+    ) {
+        SettingsScreenRoute(onBack = { navController.popBackStack() })
+    }
+}
+
+@Composable
+private fun BottomNavigationBar(
+    navController: NavHostController,
+    scrollCallbacks: MutableMap<String, () -> Unit>,
+) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+    val bottomNavRoutes = bottomScreens.map { it.route }
+
+    NavigationBar {
+        bottomScreens.forEach { screen ->
+            NavigationBarItem(
+                icon = {
+                    Icon(
+                        screen.icon,
+                        contentDescription = stringResource(screen.titleRes),
                     )
                 },
-                exitTransition = {
-                    slideOutHorizontally(animationSpec = tween(300)) { -it }
-                },
-                popEnterTransition = {
-                    slideInHorizontally(animationSpec = tween(300)) { -it }
-                },
-                popExitTransition = {
-                    slideOutHorizontally(animationSpec = tween(300)) { it } + fadeOut(
-                        animationSpec = tween(
-                            300
-                        )
+                label = { Text(stringResource(screen.titleRes)) },
+                selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                onClick = {
+                    handleNavigationClick(
+                        navController,
+                        currentDestination,
+                        screen,
+                        bottomNavRoutes,
+                        scrollCallbacks,
                     )
                 },
-            ) {
-                DetailsScreenRoute(
-                    onBack = { navController.popBackStack() }
-                )
-            }
+            )
+        }
+    }
+}
 
-            composable(
-                route = ScreenRoute.Search.route,
-                enterTransition = { fadeIn(animationSpec = tween(300)) },
-                exitTransition = { fadeOut(animationSpec = tween(300)) },
-                popEnterTransition = { fadeIn(animationSpec = tween(300)) },
-                popExitTransition = { fadeOut(animationSpec = tween(300)) },
-            ) {
-                val listState = savedListStates.getOrPut(ScreenRoute.Search.route) {
-                    rememberLazyListState()
-                }
-                SearchScreenRoute(
-                    listState = listState,
-                    onItemClicked = { releaseId ->
-                        navController.navigate(ScreenRouter.detailsRoute(releaseId))
-                    },
-                    onScrollToTopProvider = { callback ->
-                        scrollCallbacks[ScreenRoute.Search.route] = callback
-                    }
-                )
-            }
+private fun handleNavigationClick(
+    navController: NavHostController,
+    currentDestination: NavDestination?,
+    screen: ScreenRoute,
+    bottomNavRoutes: List<String>,
+    scrollCallbacks: MutableMap<String, () -> Unit>,
+) {
+    val currentRoute = currentDestination?.route ?: return
+    val previousRoute = navController.previousBackStackEntry?.destination?.route
 
-            composable(
-                route = ScreenRoute.Favorites.route,
-                enterTransition = { fadeIn(animationSpec = tween(300)) },
-                exitTransition = { fadeOut(animationSpec = tween(300)) },
-                popEnterTransition = { fadeIn(animationSpec = tween(300)) },
-                popExitTransition = { fadeOut(animationSpec = tween(300)) },
-            ) {
-                val listState = savedListStates.getOrPut(ScreenRoute.Favorites.route) {
-                    rememberLazyListState()
-                }
+    if (currentRoute == screen.route) {
+        scrollCallbacks[currentRoute]?.invoke()
+        return
+    }
 
-                FavoritesScreenRoute(
-                    listState = listState,
-                    onItemClicked = { releaseId ->
-                        navController.navigate(ScreenRouter.detailsRoute(releaseId))
-                    },
-                    onSettingsClicked = { navController.navigate(ScreenRoute.Settings.route) },
-                    onScrollToTopProvider = { callback ->
-                        scrollCallbacks[ScreenRoute.Favorites.route] = callback
-                    }
-                )
-            }
+    val isCurrentRouteBottomNav = bottomNavRoutes.contains(currentRoute)
 
-            composable(
-                route = ScreenRoute.Settings.route,
-                enterTransition = {
-                    slideInHorizontally(animationSpec = tween(300)) { it } + fadeIn(
-                        animationSpec = tween(
-                            300
-                        )
-                    )
-                },
-                exitTransition = {
-                    slideOutHorizontally(animationSpec = tween(300)) { -it }
-                },
-                popEnterTransition = {
-                    slideInHorizontally(animationSpec = tween(300)) { -it }
-                },
-                popExitTransition = {
-                    slideOutHorizontally(animationSpec = tween(300)) { it } + fadeOut(
-                        animationSpec = tween(
-                            300
-                        )
-                    )
-                },
-            ) {
-                SettingsScreenRoute(
-                    onBack = { navController.popBackStack() }
-                )
+    if (!isCurrentRouteBottomNav) {
+        if (previousRoute == screen.route) {
+            navController.popBackStack()
+        } else {
+            navController.navigate(screen.route) {
+                popUpTo(currentRoute) { inclusive = true }
+                launchSingleTop = true
             }
         }
+        return
+    }
+
+    navController.navigate(screen.route) {
+        launchSingleTop = true
+        restoreState = true
     }
 }

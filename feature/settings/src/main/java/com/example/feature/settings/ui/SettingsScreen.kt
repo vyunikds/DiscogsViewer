@@ -37,63 +37,73 @@ fun SettingsScreen(
     onThemeModeChanged: (Int) -> Unit,
 ) {
     Scaffold(
-        topBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(horizontal = 8.dp),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier.align(Alignment.CenterStart)
-                ) {
-                    Icon(
-                        Icons.Default.ArrowBack,
-                        contentDescription = stringResource(R.string.back),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                }
-
-                Text(
-                    text = stringResource(R.string.settings_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.align(Alignment.Center),
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
+        topBar = { SettingsTopBar(onBack) },
     ) { innerPadding ->
-        Column(
-            modifier = modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(16.dp)
+        SettingsBody(modifier, innerPadding, state, onThemeModeChanged)
+    }
+}
+
+@Composable
+private fun SettingsTopBar(onBack: () -> Unit) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 8.dp),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        IconButton(
+            onClick = onBack,
+            modifier = Modifier.align(Alignment.CenterStart),
         ) {
-            Text(
-                text = stringResource(R.string.theme_title),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Spacer(modifier = Modifier.padding(8.dp))
-            ThemeModeRow(
-                label = stringResource(R.string.theme_system),
-                selected = state.themeMode == 0,
-                onClick = { onThemeModeChanged(0) },
-            )
-            ThemeModeRow(
-                label = stringResource(R.string.theme_light),
-                selected = state.themeMode == 1,
-                onClick = { onThemeModeChanged(1) },
-            )
-            ThemeModeRow(
-                label = stringResource(R.string.theme_dark),
-                selected = state.themeMode == 2,
-                onClick = { onThemeModeChanged(2) },
+            Icon(
+                Icons.Default.ArrowBack,
+                contentDescription = stringResource(R.string.back),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
             )
         }
+        Text(
+            text = stringResource(R.string.settings_title),
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.align(Alignment.Center),
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+private fun SettingsBody(
+    modifier: Modifier,
+    innerPadding: androidx.compose.foundation.layout.PaddingValues,
+    state: SettingsScreenState,
+    onThemeModeChanged: (Int) -> Unit,
+) {
+    Column(
+        modifier = modifier.padding(innerPadding).fillMaxSize().padding(16.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.theme_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Spacer(modifier = Modifier.padding(8.dp))
+        ThemeModeRow(
+            label = stringResource(R.string.theme_system),
+            selected = state.themeMode == 0,
+            onClick = { onThemeModeChanged(0) },
+        )
+        ThemeModeRow(
+            label = stringResource(R.string.theme_light),
+            selected = state.themeMode == 1,
+            onClick = { onThemeModeChanged(1) },
+        )
+        ThemeModeRow(
+            label = stringResource(R.string.theme_dark),
+            selected = state.themeMode == 2,
+            onClick = { onThemeModeChanged(2) },
+        )
     }
 }
 
@@ -105,9 +115,10 @@ private fun ThemeModeRow(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {

@@ -1,0 +1,49 @@
+import org.gradle.internal.os.OperatingSystem
+
+def hooksDirName = ".githooks"
+
+def installGitHooksAction = {
+    try {
+        def process = ["git", "config", "--local", "core.hooksPath"].execute()
+        def outputStream = new ByteArrayOutputStream()
+        process.consumeProcessOutput(outputStream, new ByteArrayOutputStream())
+        process.waitFor()
+
+        def currentHooksPath = outputStream.toString().trim()
+
+        if (currentHooksPath != hooksDirName) {
+            println "Configuring git hooks path to '$hooksDirName'..."
+            def setConfigProc = ["git", "config", "--local", "core.hooksPath", hooksDirName].execute()
+            setConfigProc.waitFor()
+            if (setConfigProc.exitValue() != 0) {
+                println "Failed to set git hooks path. Exit code: ${setConfigProc.exitValue()}"
+                println "Error output: ${setConfigProc.err.text}"
+            } else {
+                println "✓ Git hooks configured."
+            }
+        }
+    } catch (Exception e) {
+        println "Warning: Could not configure git hooks path: ${e.message}"
+    }
+
+    if (OperatingSystem.current().isLinux() || OperatingSystem.current().isMacOsX()) {
+        def hooksDir = file("$rootDir/$hooksDirName")
+        if (hooksDir.exists()) {
+            hooksDir.eachFile { hookFile ->
+                if (hookFile.isFile() && !hookFile.canExecute()) {
+                    println "Making ${hookFile.name} executable..."
+                    hookFile.setExecutable(true, false)
+                }
+            }
+        }
+    }
+}
+
+tasks.register("installGitHooks") {
+    description = "Install local repository git hooks"
+    doLast {
+        installGitHooksAction()
+    }
+}
+
+installGitHooksAction()
