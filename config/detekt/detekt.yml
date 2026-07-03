@@ -1,0 +1,88 @@
+build:
+  maxIssues: 0
+  excludeCorrectable: false
+
+complexity:
+  LongParameterList:
+    functionThreshold: 6
+    constructorThreshold: 7
+  TooManyFunctions:
+    thresholdInClasses: 110
+    thresholdInFiles: 110
+    thresholdInInterfaces: 110
+  CyclomaticComplexMethod:
+    threshold: 35
+  NestedBlockDepth:
+    threshold: 5
+  NamedArguments:
+    active: false
+
+style:
+  MagicNumber:
+    active: false
+  WildcardImport:
+    active: true
+    excludeImports: []
+  UnusedParameter:
+    active: true
+  UnusedPrivateMember:
+    active: true
+    ignoreAnnotated:
+      - Preview
+      - ComposablePreview
+  UnnecessaryAbstractClass:
+    active: false
+
+naming:
+  FunctionMaxLength:
+    active: false
+  FunctionNaming:
+    ignoreAnnotated:
+      - Composable
+  VariableMaxLength:
+    active: false
+  TopLevelPropertyNaming:
+    active: true
+
+exceptions:
+  SwallowedException:
+    active: true
+    ignoredExceptionTypes:
+      - InterruptedException
+      - Exception
+  TooGenericExceptionCaught:
+    active: true
+    exceptionNames:
+      - ArrayIndexOutOfBoundsException
+      - Error
+      - IllegalMonitorStateException
+      - IndexOutOfBoundsException
+      - NullPointerException
+      - RuntimeException
+      - Throwable
+  RethrowCaughtException:
+    active: true
+
+
+potential-bugs:
+  UselessPostfixExpression:
+    active: true
+  UnreachableCatchBlock:
+    active: true
+  IgnoredReturnValue:
+    active: true
+
+
+coroutines:
+  GlobalCoroutineUsage:
+    active: true
+  RedundantSuspendModifier:
+    active: true
+  SleepInsteadOfDelay:
+    active: true
+  SuspendFunSwallowedCancellation:
+    active: true
+  SuspendFunWithCoroutineScopeReceiver:
+    active: true
+  SuspendFunWithFlowReturnType:
+    active: true

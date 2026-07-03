@@ -16,35 +16,35 @@ import com.example.core.basepresentation.ScreenRouter.SETTINGS
 sealed class ScreenRoute(
     val route: String,
     val titleRes: Int,
-    val icon: ImageVector
+    val icon: ImageVector,
 ) {
     object TopReleases : ScreenRoute(
         route = RELEASES_SCREEN,
         titleRes = R.string.nav_top_releases,
-        icon = Icons.Default.Star
+        icon = Icons.Default.Star,
     )
 
     object Details : ScreenRoute(
         route = DETAILS_SCREEN,
         titleRes = R.string.nav_details,
-        icon = Icons.Outlined.Info
+        icon = Icons.Outlined.Info,
     )
 
     object Favorites : ScreenRoute(
         route = FAVORITES,
         titleRes = R.string.nav_favorites,
-        icon = Icons.Default.Favorite
+        icon = Icons.Default.Favorite,
     )
 
     object Settings : ScreenRoute(
         route = SETTINGS,
         titleRes = R.string.nav_settings,
-        icon = Icons.Default.Settings
+        icon = Icons.Default.Settings,
     )
 
     object Search : ScreenRoute(
         route = SEARCH,
         titleRes = R.string.nav_search,
-        icon = Icons.Default.Search
+        icon = Icons.Default.Search,
     )
 }

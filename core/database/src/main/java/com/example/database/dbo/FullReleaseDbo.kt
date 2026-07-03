@@ -9,13 +9,13 @@ data class FullReleaseDbo(
     @Relation(
         parentColumn = "release_id",
         entityColumn = "genre",
-        associateBy = Junction(value = ReleaseGenreDbo::class)
+        associateBy = Junction(value = ReleaseGenreDbo::class),
     )
     val genresList: List<GenreDbo>,
     @Relation(
         parentColumn = "release_id",
         entityColumn = "country",
-        associateBy = Junction(value = ReleaseCountryDbo::class)
+        associateBy = Junction(value = ReleaseCountryDbo::class),
     )
-    val countriesList: List<CountryDbo>
+    val countriesList: List<CountryDbo>,
 )

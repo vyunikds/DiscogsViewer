@@ -10,7 +10,10 @@ interface ReleasesApiService {
     suspend fun getReleases(): List<ReleaseResultDto>
 
     @OptIn(InternalSerializationApi::class)
-    suspend fun searchReleases(title: String, page: Int): SearchResponse
+    suspend fun searchReleases(
+        title: String,
+        page: Int,
+    ): SearchResponse
 
     @OptIn(InternalSerializationApi::class)
     suspend fun getReleaseById(releaseId: Int): ReleaseDetailsDto

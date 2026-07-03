@@ -14,6 +14,7 @@ import com.example.feature.favorites.FavoritesViewModel
 import com.example.feature.favorites.state.FavoritesScreenState
 import com.example.feature.favorites.ui.FavoriteSortBottomSheet
 import com.example.feature.favorites.ui.FavoritesScreen
+import com.example.feature.favorites.ui.FavoritesScreenCallbacks
 
 @Composable
 fun FavoritesScreenRoute(
@@ -47,14 +48,17 @@ fun FavoritesScreenRoute(
     FavoritesScreen(
         state = state,
         listState = listState,
-        onRemoveFavorite = viewModel::onRemoveFavorite,
-        onItemClicked = onItemClicked,
-        onSettingsClicked = onSettingsClicked,
-        onSortClicked = { showSettings = true },
-        onLoadMore = viewModel::loadMore,
-        onGenreClicked = { genre ->
-            viewModel.setGenreFilter(genre)
-            scrollToTop()
-        },
+        callbacks =
+            FavoritesScreenCallbacks(
+                onRemoveFavorite = viewModel::onRemoveFavorite,
+                onItemClicked = onItemClicked,
+                onSettingsClicked = onSettingsClicked,
+                onSortClicked = { showSettings = true },
+                onLoadMore = viewModel::loadMore,
+                onGenreClicked = { genre ->
+                    viewModel.setGenreFilter(genre)
+                    scrollToTop()
+                },
+            ),
     )
 }

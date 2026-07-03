@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,18 +44,12 @@ import com.example.core.basepresentation.ui.ReleaseSmallCardMode
 import com.example.feature.favorites.R
 import com.example.feature.favorites.state.FavoritesScreenState
 
-
 @Composable
 fun FavoritesScreen(
     modifier: Modifier = Modifier,
     state: FavoritesScreenState,
-    onRemoveFavorite: (String) -> Unit,
-    onItemClicked: (String) -> Unit,
+    callbacks: FavoritesScreenCallbacks,
     listState: LazyListState = rememberLazyListState(),
-    onSettingsClicked: () -> Unit,
-    onSortClicked: () -> Unit,
-    onLoadMore: () -> Unit = {},
-    onGenreClicked: (String?) -> Unit = {},
 ) {
     val context = LocalContext.current
     val count = state.totalCount
@@ -61,13 +57,13 @@ fun FavoritesScreen(
     if (state.favorites.isNotEmpty()) {
         LaunchedEffect(listState, state.hasNextPage, state.isLoadingMore) {
             snapshotFlow {
-                val visibleItems = listState.layoutInfo.visibleItemsInfo
-                val totalCount = listState.layoutInfo.totalItemsCount
-                val lastVisible = visibleItems.lastOrNull()?.index ?: 0
-                lastVisible >= totalCount - 3 && state.hasNextPage && !state.isLoadingMore
+                val visible = listState.layoutInfo.visibleItemsInfo
+                val total = listState.layoutInfo.totalItemsCount
+                val last = visible.lastOrNull()?.index ?: 0
+                last >= total - 3 && state.hasNextPage && !state.isLoadingMore
             }.collect { shouldLoadMore ->
                 if (shouldLoadMore) {
-                    onLoadMore()
+                    callbacks.onLoadMore()
                 }
             }
         }
@@ -75,177 +71,183 @@ fun FavoritesScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         Column {
-            Row(
-                modifier = Modifier
-                    .align(Alignment.End),
-            ) {
-                IconButton(
-                    modifier = Modifier
-                        .padding(6.dp)
-                        .background(
-                            color = Color.White.copy(alpha = 0.5f),
-                            shape = androidx.compose.foundation.shape.CircleShape
-                        ),
-                    onClick = onSettingsClicked,
-                ) {
-                    Icon(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(6.dp),
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+            ToolbarActionButtons(callbacks)
+            FavoritesHeader(state, count, callbacks)
+            FavoritesListSection(state, listState, callbacks)
+        }
+        if (state.isLoading && state.favorites.isEmpty()) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+        if (state.hasError) {
+            Text(
+                text = state.errorProvider(context),
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.align(Alignment.Center),
+            )
+        }
+        if (state.favorites.isEmpty()) {
+            Text(
+                text = stringResource(R.string.empty_favorites),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.align(Alignment.Center),
+            )
+        }
+    }
+}
 
-                IconButton(
-                    modifier = Modifier
-                        .padding(6.dp)
-                        .background(
-                            color = Color.White.copy(alpha = 0.5f),
-                            shape = androidx.compose.foundation.shape.CircleShape
-                        ),
-                    onClick = onSortClicked,
-                ) {
-                    Icon(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(6.dp),
-                        imageVector = Icons.Default.List,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            Column(
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(horizontal = 12.dp)
-                    .fillMaxWidth(),
-            ) {
-                androidx.compose.foundation.Image(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally),
-                    painter = androidx.compose.ui.res.painterResource(R.drawable.fav_landscape),
-                    contentDescription = stringResource(R.string.favorites_image_desc),
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surfaceTint),
-                )
-                if (count > 0) {
-                    Text(
-                        modifier = Modifier
-                            .align(Alignment.Start)
-                            .padding(bottom = 6.dp),
-                        text = pluralStringResource(R.plurals.favorites_count, count, count),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                if (state.availableGenres.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState())
-                            .padding(bottom = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = stringResource(R.string.genre_all),
-                            modifier = Modifier
-                                .background(
-                                    color = if (state.selectedGenre == null)
-                                        MaterialTheme.colorScheme.primary
-                                    else
-                                        MaterialTheme.colorScheme.secondary,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                                .clickable { onGenreClicked(null) }
-                                .padding(horizontal = 6.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (state.selectedGenre == null)
-                                MaterialTheme.colorScheme.onPrimary
-                            else
-                                MaterialTheme.colorScheme.onSecondary
-                        )
-                        state.availableGenres.forEach { genre ->
-                            val isSelected = genre == state.selectedGenre
-                            Text(
-                                text = genre,
-                                modifier = Modifier
-                                    .background(
-                                        color = if (isSelected)
-                                            MaterialTheme.colorScheme.primary
-                                        else
-                                            MaterialTheme.colorScheme.secondary,
-                                        shape = RoundedCornerShape(8.dp)
-                                    )
-                                    .clickable { onGenreClicked(genre) }
-                                    .padding(horizontal = 6.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = if (isSelected)
-                                    MaterialTheme.colorScheme.onPrimary
-                                else
-                                    MaterialTheme.colorScheme.onSecondary
-                            )
-                        }
-                    }
-                }
-            }
+data class FavoritesScreenCallbacks(
+    val onRemoveFavorite: (String) -> Unit,
+    val onItemClicked: (String) -> Unit,
+    val onSettingsClicked: () -> Unit,
+    val onSortClicked: () -> Unit,
+    val onLoadMore: () -> Unit = {},
+    val onGenreClicked: (String?) -> Unit = {},
+)
 
-            if (state.favorites.isNotEmpty()) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    state = listState,
-                ) {
-                    items(
-                        items = state.favorites,
-                        key = { it.id }
-                    ) { favorite ->
-                        ReleaseSmallCard(
-                            release = favorite.toReleaseCardState(),
-                            mode = ReleaseSmallCardMode.FAVORITES,
-                            onRemoveFavorite = onRemoveFavorite,
-                            onItemClicked = onItemClicked,
-                        )
-                    }
-                    if (state.isLoadingMore) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
-                    }
-                }
+@Composable
+private fun ToolbarActionButtons(callbacks: FavoritesScreenCallbacks) {
+    Row(horizontalArrangement = Arrangement.End) {
+        IconButton(
+            modifier =
+                Modifier
+                    .padding(6.dp)
+                    .background(
+                        color = Color.White.copy(alpha = 0.5f),
+                        shape = CircleShape,
+                    ),
+            onClick = callbacks.onSettingsClicked,
+        ) {
+            Icon(
+                modifier = Modifier.size(48.dp).padding(6.dp),
+                imageVector = Icons.Default.Settings,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        IconButton(
+            modifier =
+                Modifier
+                    .padding(6.dp)
+                    .background(
+                        color = Color.White.copy(alpha = 0.5f),
+                        shape = CircleShape,
+                    ),
+            onClick = callbacks.onSortClicked,
+        ) {
+            Icon(
+                modifier = Modifier.size(48.dp).padding(6.dp),
+                imageVector = Icons.Default.List,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun FavoritesHeader(
+    state: FavoritesScreenState,
+    count: Int,
+    callbacks: FavoritesScreenCallbacks,
+) {
+    Column(
+        modifier =
+            Modifier
+                .padding(horizontal = 12.dp)
+                .fillMaxWidth(),
+    ) {
+        androidx.compose.foundation.Image(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            painter = painterResource(R.drawable.fav_landscape),
+            contentDescription = stringResource(R.string.favorites_image_desc),
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surfaceTint),
+        )
+        if (count > 0) {
+            Text(
+                modifier = Modifier.align(Alignment.Start).padding(bottom = 6.dp),
+                text = pluralStringResource(R.plurals.favorites_count, count, count),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (state.availableGenres.isNotEmpty()) {
+            GenreFilterBar(state, callbacks)
+        }
+    }
+}
+
+@Composable
+private fun GenreFilterBar(
+    state: FavoritesScreenState,
+    callbacks: FavoritesScreenCallbacks,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(bottom = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        FilterChip(text = stringResource(R.string.genre_all), isSelected = state.selectedGenre == null) {
+            callbacks.onGenreClicked(null)
+        }
+        state.availableGenres.forEach { genre ->
+            FilterChip(text = genre, isSelected = genre == state.selectedGenre) {
+                callbacks.onGenreClicked(genre)
             }
         }
+    }
+}
 
-        when {
-            state.isLoading && state.favorites.isEmpty() -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
+@Composable
+private fun FilterChip(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    val bgColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+    val textColor =
+        if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
+    Text(
+        text = text,
+        modifier =
+            Modifier
+                .background(color = bgColor, shape = RoundedCornerShape(8.dp))
+                .clickable { onClick() }
+                .padding(horizontal = 6.dp, vertical = 4.dp),
+        style = MaterialTheme.typography.labelSmall,
+        color = textColor,
+    )
+}
+
+@Composable
+private fun FavoritesListSection(
+    state: FavoritesScreenState,
+    listState: LazyListState,
+    callbacks: FavoritesScreenCallbacks,
+) {
+    if (state.favorites.isNotEmpty()) {
+        LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
+            items(items = state.favorites, key = { it.id }) { favorite ->
+                ReleaseSmallCard(
+                    release = favorite.toReleaseCardState(),
+                    mode = ReleaseSmallCardMode.FAVORITES,
+                    onRemoveFavorite = callbacks.onRemoveFavorite,
+                    onItemClicked = callbacks.onItemClicked,
                 )
             }
-
-            state.hasError -> {
-                Text(
-                    text = state.errorProvider(context),
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-
-            state.favorites.isEmpty() -> {
-                Text(
-                    text = stringResource(R.string.empty_favorites),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+            if (state.isLoadingMore) {
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
             }
         }
     }
@@ -256,21 +258,25 @@ fun FavoritesScreen(
 private fun FavoritesScreenPreview() {
     MaterialTheme {
         FavoritesScreen(
-            state = FavoritesScreenState(
-                isLoading = false,
-                isLoadingMore = false,
-                hasNextPage = true,
-                hasError = false,
-                errorProvider = { "" },
-                favorites = listOf(),
-                availableGenres = listOf("Rock", "Jazz", "Electronic", "Hip-Hop"),
-                selectedGenre = null,
-            ),
-            onRemoveFavorite = {},
-            onItemClicked = { },
-            onSortClicked = { },
-            onSettingsClicked = { },
-            onGenreClicked = { },
+            state =
+                FavoritesScreenState(
+                    isLoading = false,
+                    isLoadingMore = false,
+                    hasNextPage = true,
+                    hasError = false,
+                    errorProvider = { "" },
+                    favorites = listOf(),
+                    availableGenres = listOf("Rock", "Jazz", "Electronic", "Hip-Hop"),
+                    selectedGenre = null,
+                ),
+            callbacks =
+                FavoritesScreenCallbacks(
+                    onRemoveFavorite = {},
+                    onItemClicked = { },
+                    onSortClicked = { },
+                    onSettingsClicked = { },
+                    onGenreClicked = { },
+                ),
         )
     }
 }

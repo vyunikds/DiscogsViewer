@@ -10,6 +10,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.feature.releases.ReleasesViewModel
 import com.example.feature.releases.state.ReleasesScreenState
 import com.example.feature.releases.ui.ReleasesScreen
+import com.example.feature.releases.ui.ReleasesScreenCallbacks
 
 @Composable
 fun ReleasesScreenRoute(
@@ -29,9 +30,12 @@ fun ReleasesScreenRoute(
     ReleasesScreen(
         state = state,
         listState = listState,
-        onRefresh = viewModel::refresh,
-        onItemClicked = onItemClicked,
-        onToggleFavorite = viewModel::onToggleFavorite,
-        onErrorShown = viewModel::errorHasShown,
+        callbacks =
+            ReleasesScreenCallbacks(
+                onRefresh = viewModel::refresh,
+                onItemClicked = onItemClicked,
+                onToggleFavorite = viewModel::onToggleFavorite,
+                onErrorShown = viewModel::errorHasShown,
+            ),
     )
 }

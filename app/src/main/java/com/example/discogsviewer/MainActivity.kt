@@ -22,14 +22,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val themeMode by settingsRepository.consumeThemeMode()
+            val themeMode by settingsRepository
+                .consumeThemeMode()
                 .collectAsState(initial = 0)
             val systemInDarkTheme = isSystemInDarkTheme()
-            val darkTheme = when (themeMode) {
-                1 -> false
-                2 -> true
-                else -> systemInDarkTheme
-            }
+            val darkTheme =
+                when (themeMode) {
+                    1 -> false
+                    2 -> true
+                    else -> systemInDarkTheme
+                }
             DiscogsViewerTheme(darkTheme = darkTheme) {
                 MainNavigation()
             }

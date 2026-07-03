@@ -28,32 +28,17 @@ import com.example.feature.details.state.ReleaseDetailsViewModel
 import com.example.feature.details.ui.ReleaseDetailsScreen
 
 @Composable
-fun DetailsScreenRoute(
-    onBack: () -> Unit,
-) {
+fun DetailsScreenRoute(onBack: () -> Unit) {
     val viewModel: ReleaseDetailsViewModel = hiltViewModel()
     val state: ReleaseDetailsScreenState by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     Scaffold(
         topBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(horizontal = 8.dp),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        Icons.Default.ArrowBack,
-                        contentDescription = stringResource(R.string.back),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                }
-            }
-        }
+            BackTopBar(
+                onBack = onBack,
+            )
+        },
     ) { innerPadding ->
         ReleaseDetailsScreen(
             modifier = Modifier.padding(innerPadding),
@@ -61,31 +46,60 @@ fun DetailsScreenRoute(
             onToggleFavorite = viewModel::onToggleFavorite,
             onRetry = viewModel::retry,
             onShare = {
-                val details = state.detailsState
-                val shareText = "https://discogs.com/release/${details.id}"
-                val shareTitle = context.getString(R.string.share_via)
-                val messengerIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, shareText)
-                        addCategory(Intent.CATEGORY_APP_MESSAGING)
-                    }
-                } else {
-                    null
-                }
-                val intent = if (messengerIntent != null
-                    && context.packageManager.queryIntentActivities(messengerIntent, 0).isNotEmpty()
-                ) {
-                    Intent.createChooser(messengerIntent, shareTitle)
-                } else {
-                    val generalIntent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, shareText)
-                    }
-                    Intent.createChooser(generalIntent, shareTitle)
-                }
-                context.startActivity(intent)
+                val shareText = "https://discogs.com/release/${state.detailsState.id}"
+                shareRelease(context, shareText)
             },
         )
     }
+}
+
+@Composable
+private fun BackTopBar(onBack: () -> Unit) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 8.dp),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        IconButton(onClick = onBack) {
+            Icon(
+                Icons.Default.ArrowBack,
+                contentDescription = stringResource(R.string.back),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+        }
+    }
+}
+
+private fun shareRelease(
+    context: android.content.Context,
+    shareText: String,
+) {
+    val shareTitle = context.getString(R.string.share_via)
+    val messengerIntent =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, shareText)
+                addCategory(Intent.CATEGORY_APP_MESSAGING)
+            }
+        } else {
+            null
+        }
+    val intent =
+        if (messengerIntent != null &&
+            context.packageManager.queryIntentActivities(messengerIntent, 0).isNotEmpty()
+        ) {
+            Intent.createChooser(messengerIntent, shareTitle)
+        } else {
+            Intent(Intent.ACTION_SEND)
+                .apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, shareText)
+                }.let { Intent.createChooser(it, shareTitle) }
+        }
+    context.startActivity(intent)
 }

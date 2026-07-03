@@ -32,7 +32,6 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-
 }
 
 dependencies {
@@ -41,7 +40,10 @@ dependencies {
     kapt(libs.bundles.common.network.kapt)
 }
 
-fun getPropertyValue(filename: String, propName: String): String {
+fun getPropertyValue(
+    filename: String,
+    propName: String,
+): String {
     val propsFile = project.file(filename)
     check(propsFile.exists())
 

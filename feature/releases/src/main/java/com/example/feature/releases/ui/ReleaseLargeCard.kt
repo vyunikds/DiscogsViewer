@@ -55,132 +55,142 @@ fun ReleaseLargeCard(
     onItemClicked: (String) -> Unit,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min)
-            .clickable { onItemClicked(release.id) }
-            .padding(horizontal = 16.dp, vertical = 24.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
+                .clickable { onItemClicked(release.id) }
+                .padding(horizontal = 16.dp, vertical = 24.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(120.dp)
-        ) {
-            SubcomposeAsyncImage(
-                model = release.thumb.ifBlank { release.coverImage.ifBlank { null } },
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
+        CoverImage(release = release, modifier = Modifier.weight(1f))
+        InfoColumn(release = release, modifier = Modifier.weight(1f))
+        FavoriteToggleButton(release = release, onToggleFavorite = onToggleFavorite)
+    }
+}
+
+@Composable
+private fun CoverImage(
+    release: ReleaseCardState,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier.height(120.dp)) {
+        SubcomposeAsyncImage(
+            model = release.thumb.ifBlank { release.coverImage.ifBlank { null } },
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier =
+                Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(12.dp))
                     .background(MaterialTheme.colorScheme.onPrimary),
-                loading = {
-                    Image(
-                        painter = painterResource(R.drawable.discogs),
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
-                    )
-                },
-                error = {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Image(
-                                painter = painterResource(R.drawable.discogs),
-                                contentDescription = null,
-                                contentScale = ContentScale.Fit,
-                                modifier = Modifier.padding(16.dp),
-                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
-                            )
-                            Text(
-                                text = stringResource(R.string.image_not_available),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-                },
-            )
-        }
-
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-                .padding(horizontal = 12.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = release.releaseTitle,
-                fontWeight = FontWeight.Medium,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.secondary
-            )
-
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = release.artistTitle,
-                fontWeight = FontWeight.Light,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                release.genre.forEach { genre ->
-                    Text(
-                        text = genre,
-                        modifier = Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.secondary,
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .padding(horizontal = 6.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSecondary
-                    )
-                }
-            }
-        }
-
-        IconButton(
-            onClick = { onToggleFavorite?.invoke(release.id, !release.isFavorite) }
-        ) {
-            AnimatedContent(
-                targetState = release.isFavorite,
-                transitionSpec = {
-                    (fadeIn() + scaleIn(initialScale = 0.2f))
-                        .togetherWith(fadeOut() + scaleOut(targetScale = 0.2f))
-                },
-                label = "favorite_icon_animation"
-            ) { isFavorite ->
-                Icon(
-                    modifier = Modifier.size(32.dp),
-                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = stringResource(R.string.add_favorite_desc),
-                    tint = if (isFavorite) FavoriteRed else MaterialTheme.colorScheme.onSurface
+            loading = {
+                Image(
+                    painter = painterResource(R.drawable.discogs),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
                 )
-            }
+            },
+            error = {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Image(
+                            painter = painterResource(R.drawable.discogs),
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.padding(16.dp),
+                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
+                        )
+                        Text(
+                            text = stringResource(R.string.image_not_available),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun InfoColumn(
+    release: ReleaseCardState,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.fillMaxHeight().padding(horizontal = 12.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = release.releaseTitle,
+            fontWeight = FontWeight.Medium,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.secondary,
+        )
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = release.artistTitle,
+            fontWeight = FontWeight.Light,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        GenreChips(release.genre)
+    }
+}
+
+@Composable
+private fun GenreChips(genres: List<String>) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        genres.forEach { genre ->
+            Text(
+                text = genre,
+                modifier =
+                    Modifier
+                        .background(color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(8.dp))
+                        .padding(horizontal = 6.dp, vertical = 4.dp),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSecondary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun FavoriteToggleButton(
+    release: ReleaseCardState,
+    onToggleFavorite: ((String, Boolean) -> Unit)?,
+) {
+    IconButton(onClick = { onToggleFavorite?.invoke(release.id, !release.isFavorite) }) {
+        AnimatedContent(
+            targetState = release.isFavorite,
+            transitionSpec = {
+                (fadeIn() + scaleIn(initialScale = 0.2f))
+                    .togetherWith(fadeOut() + scaleOut(targetScale = 0.2f))
+            },
+            label = "favorite_icon_animation",
+        ) { isFavorite ->
+            Icon(
+                modifier = Modifier.size(32.dp),
+                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = stringResource(R.string.add_favorite_desc),
+                tint = if (isFavorite) FavoriteRed else MaterialTheme.colorScheme.onSurface,
+            )
         }
     }
 }
@@ -190,17 +200,18 @@ fun ReleaseLargeCard(
 private fun PreviewReleaseLargeCard() {
     MaterialTheme {
         ReleaseLargeCard(
-            release = ReleaseCardState(
-                id = "1",
-                releaseTitle = "Random Access Memories",
-                artistTitle = "Daft Punk",
-                thumb = "https://i.discogs.com/test.jpg",
-                genre = listOf("Electronic", "House"),
-                isFavorite = true,
-                country = "France",
-            ),
+            release =
+                ReleaseCardState(
+                    id = "1",
+                    releaseTitle = "Random Access Memories",
+                    artistTitle = "Daft Punk",
+                    thumb = "https://i.discogs.com/test.jpg",
+                    genre = listOf("Electronic", "House"),
+                    isFavorite = true,
+                    country = "France",
+                ),
             onToggleFavorite = { _, _ -> },
-            onItemClicked = {}
+            onItemClicked = {},
         )
     }
 }

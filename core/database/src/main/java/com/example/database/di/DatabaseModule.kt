@@ -17,19 +17,18 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
-
     @Provides
     fun provideDatabase(
-        @ApplicationContext context: Context
-    ): AppDatabase {
-        return Room.databaseBuilder(
-            context.applicationContext,
-            AppDatabase::class.java,
-            DATABASE_NAME
-        ).addMigrations(MIGRATION_3_4, MIGRATION_4_5)
-         .fallbackToDestructiveMigration()
-         .build()
-    }
+        @ApplicationContext context: Context,
+    ): AppDatabase =
+        Room
+            .databaseBuilder(
+                context.applicationContext,
+                AppDatabase::class.java,
+                DATABASE_NAME,
+            ).addMigrations(MIGRATION_3_4, MIGRATION_4_5)
+            .fallbackToDestructiveMigration()
+            .build()
 
     @Provides
     fun provideReleaseDao(database: AppDatabase): ReleaseDao = database.getReleaseDao()
