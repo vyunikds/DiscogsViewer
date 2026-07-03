@@ -191,11 +191,11 @@ private fun GenreFilterBar(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        filterChip(text = stringResource(R.string.genre_all), isSelected = state.selectedGenre == null) {
+        FilterChip(text = stringResource(R.string.genre_all), isSelected = state.selectedGenre == null) {
             callbacks.onGenreClicked(null)
         }
         state.availableGenres.forEach { genre ->
-            filterChip(text = genre, isSelected = genre == state.selectedGenre) {
+            FilterChip(text = genre, isSelected = genre == state.selectedGenre) {
                 callbacks.onGenreClicked(genre)
             }
         }
@@ -203,7 +203,7 @@ private fun GenreFilterBar(
 }
 
 @Composable
-private fun filterChip(
+private fun FilterChip(
     text: String,
     isSelected: Boolean,
     onClick: () -> Unit,

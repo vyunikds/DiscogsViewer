@@ -3,6 +3,8 @@
 agp = "8.13.2"
 kotlin = "2.0.21"
 hilt = "2.57.1"
+detekt = "1.23.7"
+ktlint = "12.1.1"
 
 # libs
 coreKtx = "1.17.0"
@@ -81,6 +83,8 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 android-library = { id = "com.android.library", version.ref = "agp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 
 [bundles]
 common-database-kapt = [
