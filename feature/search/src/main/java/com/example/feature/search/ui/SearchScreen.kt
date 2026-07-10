@@ -36,6 +36,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -89,7 +90,7 @@ fun SearchScreen(
         }
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize().testTag("search_screen")) {
         Column(modifier = Modifier.fillMaxSize()) {
             SearchField(
                 searchText = searchText,
@@ -177,12 +178,18 @@ private fun SearchContentArea(
             }
         }
         if (state.isLoading && state.releasesSearchListState.isEmpty()) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .testTag("search_loading"),
+            )
         }
         if (showHistory && state.searchHistory.isEmpty()) {
             Text(
                 text = stringResource(R.string.empty_search_history),
-                modifier = Modifier.align(Alignment.Center),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .testTag("search_empty"),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -216,6 +223,7 @@ private fun SearchField(
         tonalElevation = 0.dp,
         inputField = {
             TextField(
+                modifier = Modifier.testTag("search_field"),
                 value = searchText,
                 onValueChange = onTextChange,
                 placeholder = { Text(stringResource(R.string.search_placeholder)) },

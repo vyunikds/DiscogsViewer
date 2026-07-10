@@ -5,6 +5,10 @@ kotlin = "2.0.21"
 hilt = "2.57.1"
 detekt = "1.23.7"
 ktlint = "12.1.1"
+kaspresso = "1.6.1"
+mockkAndroid = "1.13.12"
+navigationTesting = "2.8.9"
+okhttp = "4.12.0" # для MockWebServer
 
 # libs
 coreKtx = "1.17.0"
@@ -80,6 +84,15 @@ datastore-preferences = { group = "androidx.datastore", name = "datastore-prefer
 detekt-api = { group = "io.gitlab.arturbosch.detekt", name = "detekt-api", version.ref = "detekt" }
 detekt-test = { group = "io.gitlab.arturbosch.detekt", name = "detekt-test", version.ref = "detekt" }
 detekt-test-utils = { group = "io.gitlab.arturbosch.detekt", name = "detekt-test-utils", version.ref = "detekt" }
+
+kaspresso = { group = "com.kaspersky.android-components", name = "kaspresso", version.ref = "kaspresso" }
+kaspresso-compose = { group = "com.kaspersky.android-components", name = "kaspresso-compose-support", version.ref = "kaspresso" }
+mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockkAndroid" }
+androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
+okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
+
+hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
+androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

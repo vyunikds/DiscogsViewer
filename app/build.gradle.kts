@@ -19,7 +19,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.example.discogsviewer.DiscogsTestRunner"
     }
 
     buildTypes {
@@ -39,10 +39,17 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
+        freeCompilerArgs += "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
     }
 
     buildFeatures {
         compose = true
+    }
+
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+        }
     }
 }
 
@@ -53,6 +60,8 @@ dependencies {
     implementation(project(":feature:details"))
     implementation(project(":feature:settings"))
     implementation(project(":core:basepresentation"))
+    implementation(project(":core:database"))
+    implementation(project(":core:network"))
     implementation(project(":data:settings"))
 
     implementation(libs.bundles.compose)
@@ -82,10 +91,22 @@ dependencies {
     testImplementation(libs.coroutines.test)
     testImplementation(libs.turbine)
     testImplementation(libs.kotlin.test.junit)
+    androidTestImplementation(project(":core:database"))
+    androidTestImplementation(project(":data:releases"))
+    androidTestImplementation(project(":data:settings"))
+    androidTestImplementation(libs.androidx.room.runtime)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.kaspresso)
+    androidTestImplementation(libs.kaspresso.compose)
+    androidTestImplementation(libs.hilt.android.testing)
+    kaptAndroidTest(libs.hilt.compiler)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.mockk.android) {
+        exclude(group = "org.junit.jupiter")
+    }
+    androidTestImplementation(libs.androidx.navigation.testing)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

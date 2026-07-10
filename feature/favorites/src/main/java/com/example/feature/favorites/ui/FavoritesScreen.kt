@@ -32,6 +32,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -69,14 +70,18 @@ fun FavoritesScreen(
         }
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize().testTag("favorites_screen")) {
         Column {
             ToolbarActionButtons(callbacks)
             FavoritesHeader(state, count, callbacks)
             FavoritesListSection(state, listState, callbacks)
         }
         if (state.isLoading && state.favorites.isEmpty()) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            CircularProgressIndicator(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .testTag("favorites_loading"),
+        )
         }
         if (state.hasError) {
             Text(
@@ -90,7 +95,9 @@ fun FavoritesScreen(
                 text = stringResource(R.string.empty_favorites),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.align(Alignment.Center),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .testTag("favorites_empty"),
             )
         }
     }
@@ -107,11 +114,15 @@ data class FavoritesScreenCallbacks(
 
 @Composable
 private fun ToolbarActionButtons(callbacks: FavoritesScreenCallbacks) {
-    Row(horizontalArrangement = Arrangement.End) {
-        IconButton(
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+    ) {
+    IconButton(
             modifier =
                 Modifier
                     .padding(6.dp)
+                    .testTag("favorites_settings_button")
                     .background(
                         color = Color.White.copy(alpha = 0.5f),
                         shape = CircleShape,
@@ -129,6 +140,7 @@ private fun ToolbarActionButtons(callbacks: FavoritesScreenCallbacks) {
             modifier =
                 Modifier
                     .padding(6.dp)
+                    .testTag("favorites_sort_button")
                     .background(
                         color = Color.White.copy(alpha = 0.5f),
                         shape = CircleShape,

@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -56,6 +57,7 @@ fun ReleaseSmallCard(
             modifier
                 .fillMaxWidth()
                 .height(90.dp)
+                .testTag("small_card_${release.id}")
                 .clickable { onItemClicked(release.id) },
     ) {
         Row(
@@ -83,7 +85,9 @@ fun ReleaseSmallCard(
                         .padding(horizontal = 4.dp),
             ) {
                 Text(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("smallcard_title_${release.id}"),
                     text = release.releaseTitle,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
@@ -93,7 +97,9 @@ fun ReleaseSmallCard(
                 )
 
                 Text(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("smallcard_artist_${release.id}"),
                     text = release.artistTitle,
                     fontWeight = FontWeight.Light,
                     maxLines = 1,
@@ -132,7 +138,9 @@ fun ReleaseSmallCard(
                 ReleaseSmallCardMode.FAVORITES -> {
                     if (onRemoveFavorite != null) {
                         IconButton(
-                            modifier = Modifier.align(Alignment.CenterVertically),
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .testTag("smallcard_remove_favorite_${release.id}"),
                             onClick = { onRemoveFavorite(release.id) },
                         ) {
                             Icon(
@@ -148,7 +156,9 @@ fun ReleaseSmallCard(
                 ReleaseSmallCardMode.TOGGLE_FAVORITE -> {
                     if (onToggleFavorite != null) {
                         IconButton(
-                            modifier = Modifier.align(Alignment.CenterVertically),
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .testTag("smallcard_toggle_favorite_${release.id}"),
                             onClick = { onToggleFavorite(release.id, !release.isFavorite) },
                         ) {
                             AnimatedContent(

@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -67,10 +68,15 @@ fun ReleaseDetailsScreen(
     Box(
         modifier =
             modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .testTag("details_screen"),
     ) {
         if (state.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .testTag("details_loading"),
+            )
         } else if (state.hasError) {
             ErrorStateView(
                 state.errorProvider,
@@ -105,7 +111,10 @@ private fun ErrorStateView(
             style = MaterialTheme.typography.bodyLarge,
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onRetry) {
+        Button(
+            modifier = Modifier.testTag("details_retry_button"),
+            onClick = onRetry,
+        ) {
             Text(stringResource(R.string.try_again))
         }
     }
@@ -179,6 +188,7 @@ private fun CoverImageSection(
                 modifier =
                     Modifier
                         .padding(6.dp)
+                        .testTag("details_share_button")
                         .background(color = Color.White.copy(alpha = 0.5f), shape = CircleShape),
                 onClick = { onShare() },
             ) {
@@ -224,7 +234,9 @@ private fun CoverErrorContent() {
 @Composable
 private fun ReleaseReleaseTitleText(title: String) {
     Text(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("details_title"),
         text = title,
         fontSize = 32.sp,
         fontWeight = FontWeight.Medium,
