@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -210,9 +211,12 @@ private fun BottomNavigationBar(
     val currentDestination = navBackStackEntry?.destination
     val bottomNavRoutes = bottomScreens.map { it.route }
 
-    NavigationBar {
+    NavigationBar(
+        modifier = Modifier.testTag("bottom_nav_bar"),
+    ) {
         bottomScreens.forEach { screen ->
             NavigationBarItem(
+                modifier = Modifier.testTag("bottom_nav_${screen.route}"),
                 icon = {
                     Icon(
                         screen.icon,

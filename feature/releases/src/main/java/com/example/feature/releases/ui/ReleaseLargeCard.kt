@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -125,7 +126,10 @@ private fun InfoColumn(
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(
-            modifier = Modifier.fillMaxWidth(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .testTag("release_title_${release.id}"),
             text = release.releaseTitle,
             fontWeight = FontWeight.Medium,
             maxLines = 2,
@@ -134,7 +138,10 @@ private fun InfoColumn(
             color = MaterialTheme.colorScheme.secondary,
         )
         Text(
-            modifier = Modifier.fillMaxWidth(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .testTag("release_artist_${release.id}"),
             text = release.artistTitle,
             fontWeight = FontWeight.Light,
             maxLines = 1,
@@ -176,7 +183,10 @@ private fun FavoriteToggleButton(
     release: ReleaseCardState,
     onToggleFavorite: ((String, Boolean) -> Unit)?,
 ) {
-    IconButton(onClick = { onToggleFavorite?.invoke(release.id, !release.isFavorite) }) {
+    IconButton(
+        modifier = Modifier.testTag("release_favorite_${release.id}"),
+        onClick = { onToggleFavorite?.invoke(release.id, !release.isFavorite) },
+    ) {
         AnimatedContent(
             targetState = release.isFavorite,
             transitionSpec = {

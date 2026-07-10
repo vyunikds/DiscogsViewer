@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.feature.search.R
@@ -29,6 +30,7 @@ fun SearchHistoryItem(
         modifier =
             modifier
                 .fillMaxWidth()
+                .testTag("search_history_item")
                 .clickable(onClick = onClick)
                 .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -42,9 +44,15 @@ fun SearchHistoryItem(
                 imageVector = Icons.Default.Search,
                 contentDescription = null,
             )
-            Text(text = query)
+            Text(
+                modifier = Modifier.testTag("search_history_query"),
+                text = query,
+            )
         }
-        IconButton(onClick = onDelete) {
+        IconButton(
+            modifier = Modifier.testTag("search_history_delete"),
+            onClick = onDelete,
+        ) {
             Icon(Icons.Default.Close, contentDescription = stringResource(R.string.delete))
         }
     }

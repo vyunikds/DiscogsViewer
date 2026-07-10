@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,7 +50,8 @@ fun ReleasesScreen(
         onRefresh = callbacks.onRefresh,
         modifier =
             modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .testTag("releases_screen"),
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -63,6 +65,7 @@ fun ReleasesScreen(
                         release = release.toReleaseCardState(),
                         onToggleFavorite = callbacks.onToggleFavorite,
                         onItemClicked = callbacks.onItemClicked,
+                        modifier = Modifier.testTag("release_card_${release.id}"),
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
@@ -74,7 +77,10 @@ fun ReleasesScreen(
 
             if ((!state.isInitialized || state.isLoading) && state.releasesListState.isEmpty()) {
                 CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
+                    modifier =
+                        Modifier
+                            .align(Alignment.Center)
+                            .testTag("releases_loading"),
                 )
             }
 
@@ -84,7 +90,10 @@ fun ReleasesScreen(
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.align(Alignment.Center),
+                    modifier =
+                        Modifier
+                            .align(Alignment.Center)
+                            .testTag("releases_empty"),
                 )
             }
         }

@@ -14,6 +14,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.feature.favorites.R
@@ -36,6 +37,7 @@ fun FavoriteSortBottomSheet(
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .testTag("sort_bottom_sheet")
                     .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -64,14 +66,11 @@ fun FavoriteSortBottomSheet(
                     )
                 }
             }
-            TextButton(
-                onClick = { onDismiss() },
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-            ) {
-                Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.primary)
+                TextButton(
+                    modifier = Modifier.testTag("sort_cancel_button"),
+                    onClick = { onDismiss() },
+                ) {
+                    Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.primary)
             }
         }
         keyboardController?.hide()

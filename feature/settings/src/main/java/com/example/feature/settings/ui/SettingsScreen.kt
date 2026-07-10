@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -22,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +37,7 @@ fun SettingsScreen(
     onThemeModeChanged: (Int) -> Unit,
 ) {
     Scaffold(
+        modifier = Modifier.testTag("settings_screen"),
         topBar = { SettingsTopBar(onBack) },
     ) { innerPadding ->
         SettingsBody(modifier, innerPadding, state, onThemeModeChanged)
@@ -56,7 +57,9 @@ private fun SettingsTopBar(onBack: () -> Unit) {
     ) {
         IconButton(
             onClick = onBack,
-            modifier = Modifier.align(Alignment.CenterStart),
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .testTag("settings_back_button"),
         ) {
             Icon(
                 Icons.Default.ArrowBack,
@@ -81,7 +84,10 @@ private fun SettingsBody(
     onThemeModeChanged: (Int) -> Unit,
 ) {
     Column(
-        modifier = modifier.padding(innerPadding).fillMaxSize().padding(16.dp),
+        modifier = modifier
+            .padding(innerPadding)
+            .fillMaxSize()
+            .padding(16.dp),
     ) {
         Text(
             text = stringResource(R.string.theme_title),
@@ -93,16 +99,19 @@ private fun SettingsBody(
             label = stringResource(R.string.theme_system),
             selected = state.themeMode == 0,
             onClick = { onThemeModeChanged(0) },
+            modifier = Modifier.testTag("theme_system"),
         )
         ThemeModeRow(
             label = stringResource(R.string.theme_light),
             selected = state.themeMode == 1,
             onClick = { onThemeModeChanged(1) },
+            modifier = Modifier.testTag("theme_light"),
         )
         ThemeModeRow(
             label = stringResource(R.string.theme_dark),
             selected = state.themeMode == 2,
             onClick = { onThemeModeChanged(2) },
+            modifier = Modifier.testTag("theme_dark"),
         )
     }
 }
@@ -115,10 +124,9 @@ private fun ThemeModeRow(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -130,7 +138,6 @@ private fun ThemeModeRow(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
         )
-        Spacer(modifier = Modifier.width(8.dp))
     }
 }
 
