@@ -44,6 +44,8 @@ DiscogsViewer — Android-приложение, позволяющее прос�
 | Navigation        | Jetpack Navigation Compose   |
 | Concurrency       | Kotlin Coroutines                    |
 | Testing           | JUnit 4, Mockk, Turbine, Coroutines Test |
+| UI-Testing        | Kaspresso |
+
 
 ## Схема модулей
 
