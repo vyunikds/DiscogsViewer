@@ -1,3 +1,16 @@
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.TaskAction
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,6 +18,23 @@ plugins {
     alias(libs.plugins.hilt)
     kotlin("kapt")
     kotlin("plugin.serialization")
+    `maven-publish`
+}
+
+open class AppPublishingExtension {
+    var group: String = "com.example.discogsviewer"
+    var artifactId: String = "discogsviewer-app"
+    var version: String = "1.0"
+    var repositoryDir: File = File("maven-local")
+}
+
+val appPublish = AppPublishingExtension().also {
+    it.repositoryDir = layout.buildDirectory.dir("maven-local").get().asFile
+    extensions.add("appPublish", it)
+}
+
+appPublish.apply {
+    version = android.defaultConfig.versionName ?: version
 }
 
 android {
@@ -51,6 +81,89 @@ android {
             isReturnDefaultValues = true
         }
     }
+}
+
+abstract class PublishApkTask : DefaultTask() {
+
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val releaseApkDir: DirectoryProperty
+
+    @get:Input
+    abstract val mavenGroup: Property<String>
+
+    @get:Input
+    abstract val artifactId: Property<String>
+
+    @get:Input
+    abstract val version: Property<String>
+
+    @get:OutputDirectory
+    abstract val repositoryDir: DirectoryProperty
+
+    @TaskAction
+    fun publish() {
+        val group = mavenGroup.get()
+        val artifactId = artifactId.get()
+        val version = version.get()
+        val repo = repositoryDir.get().asFile
+        val apkFile = releaseApkDir.get().asFile
+            .listFiles { file -> file.isFile && file.name.startsWith("app-release") && file.name.endsWith(".apk") }
+            ?.firstOrNull()
+            ?: throw GradleException("No release APK found in ${releaseApkDir.get().asFile}. Build it first (assembleRelease).")
+
+        val versionDir = File(File(File(repo, group.replace('.', File.separatorChar)), artifactId), version)
+        versionDir.mkdirs()
+
+        apkFile.copyTo(File(versionDir, "$artifactId-$version.apk"), overwrite = true)
+        File(versionDir, "$artifactId-$version.pom").writeText(pom(group, artifactId, version))
+        writeMavenMetadata(repo, group, artifactId, version)
+
+        logger.lifecycle("Published $group:$artifactId:$version to ${repo.absolutePath}")
+    }
+
+    private fun pom(group: String, artifactId: String, version: String): String = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <project xmlns="http://maven.apache.org/POM/4.0.0"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>${group.xmlEscaped()}</groupId>
+            <artifactId>${artifactId.xmlEscaped()}</artifactId>
+            <version>${version.xmlEscaped()}</version>
+            <name>DiscogsViewer</name>
+            <description>DiscogsViewer Android application (APK)</description>
+        </project>
+    """.trimIndent()
+
+    private fun writeMavenMetadata(repo: File, group: String, artifactId: String, version: String) {
+        val artifactDir = File(File(repo, group.replace('.', File.separatorChar)), artifactId)
+        val versions = (artifactDir.listFiles { file -> file.isDirectory }?.map { file -> file.name } ?: emptyList())
+            .ifEmpty { listOf(version) }
+        val latest = versions.max()
+        val lastUpdated = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+        val versionsXml = versions.joinToString("") { "<version>$it</version>" }
+        val metadata = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <metadata>
+                <groupId>${group.xmlEscaped()}</groupId>
+                <artifactId>${artifactId.xmlEscaped()}</artifactId>
+                <versioning>
+                    <latest>$latest</latest>
+                    <release>$latest</release>
+                    <versions>$versionsXml</versions>
+                    <lastUpdated>$lastUpdated</lastUpdated>
+                </versioning>
+            </metadata>
+        """.trimIndent()
+        File(artifactDir, "maven-metadata.xml").writeText(metadata)
+    }
+
+    private fun String.xmlEscaped(): String =
+        replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
 }
 
 dependencies {
@@ -109,4 +222,15 @@ dependencies {
     androidTestImplementation(libs.androidx.navigation.testing)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+tasks.register<PublishApkTask>("publishApkToLocalMaven") {
+    group = "publishing"
+    description = "Publishes the release APK to the local Maven repository"
+    dependsOn("assembleRelease")
+    releaseApkDir = layout.buildDirectory.dir("outputs/apk/release")
+    mavenGroup.set(appPublish.group)
+    artifactId.set(appPublish.artifactId)
+    version.set(appPublish.version)
+    repositoryDir.set(appPublish.repositoryDir)
 }
