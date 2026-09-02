@@ -37,16 +37,17 @@ pipeline {
 
         stage('Benchmark') {
             steps {
-                // 1 warm-up + 3 measured cold builds; isolated gradle-user-home keeps
-                // dependency cache effects out of the measurement
+                // scenario from ci/profiler.scenarios: 1 warm-up + 3 measured cold builds.
+                // --gradle-user-home points at the shared dependency cache so the
+                // measurement is not polluted by dependency downloads
                 sh '''
                     gradle-profiler --benchmark \
-                        --warmups 1 \
-                        --iterations 3 \
+                        --scenario-file ci/profiler.scenarios \
+                        --gradle-user-home /root/.gradle \
                         --csv-format long \
                         --output-dir profile-out \
                         --project-dir . \
-                        clean assembleRelease
+                        nightly_clean_release
                 '''
             }
         }

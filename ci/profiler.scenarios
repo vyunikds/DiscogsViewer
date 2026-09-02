@@ -1,0 +1,10 @@
+# gradle-profiler scenarios for the nightly benchmark job
+# run: gradle-profiler --benchmark --scenario-file ci/profiler.scenarios nightly_clean_release
+
+nightly_clean_release {
+  title = "Nightly clean assembleRelease"
+  tasks = ["clean", "assembleRelease"]
+  gradle-args = ["-Dorg.gradle.workers.max=2"]
+  warm-ups = 1
+  iterations = 3
+}
