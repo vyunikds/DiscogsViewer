@@ -102,16 +102,21 @@ Dependency direction:
 Сборка и анализ производительности — на Jenkins в Docker.
 
 ```
-ci/Dockerfile          — образ билд-агента: JDK 17 + Android SDK 36 + Gradle Profiler
-Jenkinsfile            — сборка по веткам: main → release, остальные → debug
-Jenkinsfile-profiler   — ночной бенчмарк сборок (gradle-profiler, cron H 2 * * *)
-ci/docker-compose.yml  — запуск самого Jenkins
+ci/Dockerfile           — образ билд-агента: JDK 17 + Android SDK 36 + Gradle Profiler
+ci/Dockerfile.jenkins   — образ Jenkins-мастера: jenkins/lts + docker CLI (подъём агент-контейнеров)
+ci/profiler.scenarios   — сценарий бенчмарка для ночного джоба
+Jenkinsfile             — сборка по веткам: main → release, остальные → debug
+Jenkinsfile-profiler    — ночной бенчмарк сборок (gradle-profiler, cron H 2 * * *)
+ci/docker-compose.yml   — запуск самого Jenkins
 ```
 
-### 1. Образ билд-агента
+### 1. Образы
 
 ```bash
+# билд-агент (используется как docker-агент в pipeline)
 docker buildx build --platform linux/amd64 -f ci/Dockerfile -t discogsviewer-android-builder:17 --load .
+# мастер Jenkins (нужен до compose up)
+docker buildx build --platform linux/amd64 -f ci/Dockerfile.jenkins -t discogsviewer-jenkins:17 --load .
 ```
 
 Образ **обязательно amd64**: aapt2 (из AGP) существует только для linux x86_64.
@@ -122,32 +127,42 @@ docker buildx build --platform linux/amd64 -f ci/Dockerfile -t discogsviewer-and
 
 ```bash
 cd ci
-docker compose up -d        # UI: http://localhost:8080, agent-порт 50000
+docker compose up -d        # UI: http://localhost:8080
 ```
 
 Настройка (один раз):
-1. Wizard: разблокировать токеном из `docker logs jenkins` (строка `... initialAdminPassword`)
-2. Плагины: **Docker**, **Docker Pipeline**, **Pipeline**, **Credentials Binding**, **Git**
-   (`Manage Jenkins → Plugins`)
+1. Wizard: разблокировать токеном из `docker logs jenkins` (строка `... initialAdminPassword`);
+   логин — `admin` / этот же токен
+2. Плагины: **Docker**, **Docker Pipeline**, **Pipeline**, **Credentials Binding**, **Git**,
+   **Timestamper** (`Manage Jenkins → Plugins`)
 3. Credential: `discogs-token` (secret text) — значение `auth.token`;
    в CI оно материализуется в gitignored-файл `core/network/network.properties`
 4. `Manage Jenkins → Clouds → Docker`: агент-шаблон
-   - Image: `discogsviewer-android-builder:17`
-   - Labels: `android-builder`
-   - Args: `-v /tmp/dv-ci-gradle:/root/.gradle` (общий кэш зависимостей;
+   - Image: `discogsviewer-android-builder:17`, Labels: `android-builder`
+   - Volumes: `/tmp/dv-ci-gradle:/root/.gradle` (общий кэш зависимостей;
      в проде — именованный Docker-том)
 
 ### 3. Джобы
 
-- **discogsviewer-ci** — pipeline из `Jenkinsfile` (ветка `main` или multibranch по GitHub):
-  secrets → unit-тесты → detekt + ktlint → сборка
-  - `main`: `assembleRelease` + `publishApkToLocalMaven`, артефакты: release APK и maven-local репозиторий
-  - остальные ветки: `assembleDebug`, артефакт: debug APK
+- **discogsviewer-ci** — pipeline из `Jenkinsfile`:
+  secrets → unit-тесты → detekt + ktlint → сборка → артефакты
+  - `main`: `assembleRelease` + `publishApkToLocalMaven`;
+    артефакты: release APK и maven-local репозиторий
+  - остальные ветки: `assembleDebug`; артефакт: debug APK
+  - в plain-джобе `BRANCH_NAME` не задан — в `environment` он дефолтится к `main`
 - **discogsviewer-gradle-profiler** — pipeline из `Jenkinsfile-profiler`, cron `H 2 * * *`:
-  `gradle-profiler --benchmark clean assembleRelease` (1 warmup + 3 замера холодных сборок).
-  В `profile-out/benchmark.csv` — время каждой итерации; история артефактов джобы
-  — тренд производительности сборки. Скачок по задаче между ночными проганами — сигнал
-  к инъекции (крупные задачи видно в `benchmark.html`).
+  бенчмарк по сценарию `ci/profiler.scenarios` (1 warmup + 3 замера
+  `clean assembleRelease`, общий gradle-user-home, чтобы скачивание зависимостей
+  не мешало измерению). В `profile-out/benchmark.csv` — длительность каждой
+  итерации; история артефактов джобы — тренд производительности сборки.
+  Скачок между ночными проганами — сигнал к инспекции (по задачам — `benchmark.html`).
+
+### Особенности
+
+- `JAVA_OPTS` в compose: `-Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true` —
+  только для локального E2E (checkout из смонтированного каталога).
+- `-Dorg.gradle.workers.max=2` в pipeline — ограничение параллельности kapt:
+  при памяти Docker Desktop ~8 ГБ без лимита gradle-демон убивался OOM.
 
 ### Локальный E2E
 
