@@ -30,27 +30,27 @@ pipeline {
 
         stage('Unit tests') {
             steps {
-                sh './gradlew test --stacktrace'
+                sh './gradlew test --stacktrace -Dorg.gradle.workers.max=2'
             }
         }
 
         stage('Static analysis') {
             steps {
-                sh './gradlew detekt ktlintCheck --stacktrace'
+                sh './gradlew detekt ktlintCheck --stacktrace -Dorg.gradle.workers.max=2'
             }
         }
 
         stage('Build release (main)') {
             when { branch 'main' }
             steps {
-                sh './gradlew assembleRelease publishApkToLocalMaven --stacktrace'
+                sh './gradlew assembleRelease publishApkToLocalMaven --stacktrace -Dorg.gradle.workers.max=2'
             }
         }
 
         stage('Build debug (feature branches)') {
             when { branch '!main' }
             steps {
-                sh './gradlew assembleDebug --stacktrace'
+                sh './gradlew assembleDebug --stacktrace -Dorg.gradle.workers.max=2'
             }
         }
 

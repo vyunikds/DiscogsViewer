@@ -96,3 +96,62 @@ Dependency direction:
 ```bash
 ./gradlew assembleDebug
 ```
+
+## CI/CD
+
+Сборка и анализ производительности — на Jenkins в Docker.
+
+```
+ci/Dockerfile          — образ билд-агента: JDK 17 + Android SDK 36 + Gradle Profiler
+Jenkinsfile            — сборка по веткам: main → release, остальные → debug
+Jenkinsfile-profiler   — ночной бенчмарк сборок (gradle-profiler, cron H 2 * * *)
+ci/docker-compose.yml  — запуск самого Jenkins
+```
+
+### 1. Образ билд-агента
+
+```bash
+docker buildx build --platform linux/amd64 -f ci/Dockerfile -t discogsviewer-android-builder:17 --load .
+```
+
+Образ **обязательно amd64**: aapt2 (из AGP) существует только для linux x86_64.
+На Apple Silicon включите в Docker Desktop «Use Rosetta for x86_64 emulation» —
+иначе сборка пойдёт через QEMU и будет кратно медленнее.
+
+### 2. Jenkins
+
+```bash
+cd ci
+docker compose up -d        # UI: http://localhost:8080, agent-порт 50000
+```
+
+Настройка (один раз):
+1. Wizard: разблокировать токеном из `docker logs jenkins` (строка `... initialAdminPassword`)
+2. Плагины: **Docker**, **Docker Pipeline**, **Pipeline**, **Credentials Binding**, **Git**
+   (`Manage Jenkins → Plugins`)
+3. Credential: `discogs-token` (secret text) — значение `auth.token`;
+   в CI оно материализуется в gitignored-файл `core/network/network.properties`
+4. `Manage Jenkins → Clouds → Docker`: агент-шаблон
+   - Image: `discogsviewer-android-builder:17`
+   - Labels: `android-builder`
+   - Args: `-v /tmp/dv-ci-gradle:/root/.gradle` (общий кэш зависимостей;
+     в проде — именованный Docker-том)
+
+### 3. Джобы
+
+- **discogsviewer-ci** — pipeline из `Jenkinsfile` (ветка `main` или multibranch по GitHub):
+  secrets → unit-тесты → detekt + ktlint → сборка
+  - `main`: `assembleRelease` + `publishApkToLocalMaven`, артефакты: release APK и maven-local репозиторий
+  - остальные ветки: `assembleDebug`, артефакт: debug APK
+- **discogsviewer-gradle-profiler** — pipeline из `Jenkinsfile-profiler`, cron `H 2 * * *`:
+  `gradle-profiler --benchmark clean assembleRelease` (1 warmup + 3 замера холодных сборок).
+  В `profile-out/benchmark.csv` — время каждой итерации; история артефактов джобы
+  — тренд производительности сборки. Скачок по задаче между ночными проганами — сигнал
+  к инъекции (крупные задачи видно в `benchmark.html`).
+
+### Локальный E2E
+
+В `ci/docker-compose.yml` репо смонтировано в Jenkins (`/repos/DiscogsViewer`),
+джобы берут pipeline и исходники из локального git — GitHub не нужен.
+Для продакшена замените URL в джобе на `https://github.com/<you>/DiscogsViewer.git`
+и используйте multibranch (GitHub) job.

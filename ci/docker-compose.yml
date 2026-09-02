@@ -1,6 +1,7 @@
 services:
   jenkins:
-    image: jenkins/jenkins:lts
+    # built from ci/Dockerfile.jenkins: jenkins/lts + docker CLI (agent provisioning)
+    image: discogsviewer-jenkins:17
     container_name: jenkins
     restart: unless-stopped
     ports:
@@ -10,8 +11,12 @@ services:
       - jenkins_home:/var/jenkins_home
       # required by the Docker plugin to start build-agent containers
       - /var/run/docker.sock:/var/run/docker.sock
+      # local repo checkout for the pipeline job (use a GitHub URL in production)
+      - ..:/repos/DiscogsViewer:ro
     environment:
-      - JAVA_OPTS=-Xmx1g
+      # -Xmx1g for Jenkins itself; ALLOW_LOCAL_CHECKOUT is needed for the local
+      # git checkout in E2E (use a remote GitHub URL in production instead)
+      - JAVA_OPTS=-Xmx1g -Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true
 
 volumes:
   jenkins_home:
