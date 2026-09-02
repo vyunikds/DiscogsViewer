@@ -1,0 +1,66 @@
+// Nightly build performance benchmark using https://github.com/gradle/gradle-profiler
+// Run in a dedicated pipeline job (e.g. "discogsviewer-gradle-profiler").
+// The benchmark measures cold `clean assembleRelease` builds iteration over iteration;
+// the per-iteration values in profile-out/benchmark.csv are the trend data.
+pipeline {
+    agent {
+        docker {
+            image 'discogsviewer-android-builder:17'
+            reuseNode true
+        }
+    }
+
+    environment {
+        ANDROID_HOME = '/opt/android-sdk'
+        ANDROID_SDK_ROOT = '/opt/android-sdk'
+    }
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '30'))
+    }
+
+    triggers {
+        // nightly at ~2am (H = hashed jitter so jobs don't start on the same minute)
+        cron('H 2 * * *')
+    }
+
+    stages {
+        stage('Inject secrets') {
+            steps {
+                withCredentials([string(credentialsId: 'discogs-token', variable: 'DISCOGS_TOKEN')]) {
+                    sh 'mkdir -p core/network && printf "auth.token=%s\\n" "$DISCOGS_TOKEN" > core/network/network.properties'
+                }
+            }
+        }
+
+        stage('Benchmark') {
+            steps {
+                // 1 warm-up + 3 measured cold builds; isolated gradle-user-home keeps
+                // dependency cache effects out of the measurement
+                sh '''
+                    gradle-profiler --benchmark \
+                        --warmups 1 \
+                        --iterations 3 \
+                        --csv-format long \
+                        --output-dir profile-out \
+                        --project-dir . \
+                        clean assembleRelease
+                '''
+            }
+        }
+
+        stage('Archive results') {
+            steps {
+                archiveArtifacts artifacts: 'profile-out/**', allowEmptyArchive: false
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo 'Nightly benchmark failed - the build may be broken, check main pipeline first.'
+        }
+    }
+}
