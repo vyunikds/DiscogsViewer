@@ -9,6 +9,8 @@ pipeline {
     environment {
         ANDROID_HOME = '/opt/android-sdk'
         ANDROID_SDK_ROOT = '/opt/android-sdk'
+        // plain pipeline jobs do not set BRANCH_NAME - default to the release branch
+        BRANCH_NAME = "${BRANCH_NAME ?: 'main'}"
     }
 
     options {
