@@ -1,0 +1,15 @@
+# Jenkins master image:
+#   jenkins/jenkins:lts (JDK 21, Jenkins war, entrypoint)
+#   + docker CLI (needed by `agent { docker {} }` to spawn build-agent containers)
+# Runs as root so the CLI can talk to the mounted /var/run/docker.sock.
+FROM jenkins/jenkins:lts
+
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends docker.io docker-cli \
+    && rm -rf /var/lib/apt/lists/*
+
+# the container runs as root but the jenkins_home volume is owned by uid 1000
+RUN git config --system --add safe.directory '*'
+
+EXPOSE 8080 50000
